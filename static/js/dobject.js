@@ -4,8 +4,8 @@ var ajaxmonitorrequest=false;
 var userIdleTime = 0;
 var updateThrottled = false;
 var updateTimer;
-var randBoost = 1000;
-var successDelay = defaultSuccessDelay = 100;
+// Every second.
+var successDelay = defaultSuccessDelay = 1000;
 var throttledSuccessDelay = 240000;
 var userIdleLimit = 600;
 
@@ -30,6 +30,8 @@ function idleTicker () {
 
 function apf(url, form) {
     $.post(url, $(form).serialize());
+    // Update the oneliner immediately.
+    ajaxmonitorspawn();
     return false;
 }
 
@@ -115,9 +117,8 @@ function ajaxmonitorupdate(req) {
         }
         ajaxmonitorrequest=false;
         applyHooks();
-        var randInt = Math.floor((Math.random()*randBoost));
         updateStatus(false);
-        startAjax(successDelay + randInt); // we get a nice return ask again right away
+        startAjax(successDelay); // we get a nice return ask again right away
 }
 
 function updateVotes(data) {
