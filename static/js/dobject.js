@@ -29,9 +29,8 @@ function idleTicker () {
 }
 
 function apf(url, form) {
-    $.post(url, $(form).serialize());
     // Update the oneliner immediately.
-    ajaxmonitorspawn();
+    $.post(url, $(form).serialize(), ajaxmonitorspawn);
     return false;
 }
 
