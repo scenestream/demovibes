@@ -5,7 +5,8 @@ var userIdleTime = 0;
 var updateThrottled = false;
 var updateTimer;
 var randBoost = 1000;
-var successDelay = defaultSuccessDelay = 100;
+// Every second.
+var successDelay = defaultSuccessDelay = 1000;
 var throttledSuccessDelay = 240000;
 var userIdleLimit = 600;
 
@@ -29,7 +30,8 @@ function idleTicker () {
 }
 
 function apf(url, form) {
-    $.post(url, $(form).serialize());
+    // Update the oneliner immediately.
+    $.post(url, $(form).serialize(), ajaxmonitorspawn);
     return false;
 }
 
