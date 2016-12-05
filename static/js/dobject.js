@@ -4,6 +4,7 @@ var ajaxmonitorrequest=false;
 var userIdleTime = 0;
 var updateThrottled = false;
 var updateTimer;
+var randBoost = 1000;
 // Every second.
 var successDelay = defaultSuccessDelay = 1000;
 var throttledSuccessDelay = 240000;
@@ -116,8 +117,9 @@ function ajaxmonitorupdate(req) {
         }
         ajaxmonitorrequest=false;
         applyHooks();
+        var randInt = Math.floor((Math.random()*randBoost));
         updateStatus(false);
-        startAjax(successDelay); // we get a nice return ask again right away
+        startAjax(successDelay + randInt); // we get a nice return ask again right away
 }
 
 function updateVotes(data) {
