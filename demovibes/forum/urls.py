@@ -27,7 +27,7 @@ feed_dict = {
 urlpatterns = patterns('',
     url(r'^$', 'django.views.generic.list_detail.object_list', forum_dict, name='forum_index'),
     
-    url(r'^(?P<url>(rss|atom).*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feed_dict}),
+    #url(r'^(?P<url>(rss|atom).*)/$', 'django.contrib.syndication.views.Feed', {'feed_dict': feed_dict}),
 
     url(r'^thread/(?P<thread>[0-9]+)/$', 'forum.views.thread', name='forum_view_thread'),
     url(r'^edit/(?P<post_id>\d+)/$', 'forum.views.edit'),
