@@ -1,7 +1,7 @@
 # Django settings for demovibes project.
 
 import os, sys
-reload sys
+reload(sys)
 sys.setdefaultencoding('utf-8')
 
 import django
