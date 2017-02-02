@@ -207,7 +207,7 @@ function updateElement(linkelement, data) {
 var cachekey = "ytcacheY-";
 var datagrab="https://gdata.youtube.com/feeds/api/videos/!YTID!?v=2&alt=jsonc&callback=?";
 
-function get_yt_info(video_id, callback, errorcallback) {
+/* function get_yt_info(video_id, callback, errorcallback) {
     var content = localStorage.getItem(cachekey + video_id);
     if (!content) {
         $.getJSON(datagrab.replace("!YTID!", video_id), function(data) {
@@ -244,6 +244,7 @@ function updateOnelinerLinks() {
         });
     });
 }
+*/
 
 function hookAjaxForms() {
     $(".ajaxify").each(function (i, element) {
@@ -290,7 +291,7 @@ function hookStarHover() {
 }
 
 function applyHooks() {
-    updateOnelinerLinks();
+    //updateOnelinerLinks();
     hookAjaxForms();
     hookStarHover();
     changeTime();
