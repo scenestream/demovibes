@@ -59,7 +59,7 @@ function ajaxmonitorspawn() {
         type: 'GET',
         dataType: 'text',
         url: url,
-        timeout: 300000,
+        timeout: 60100,
         success: function(data, textStatus ){
             ajaxmonitorupdate(data);
         },
@@ -67,7 +67,7 @@ function ajaxmonitorspawn() {
             //newMessage("[Updater] Problem with server connection. Retrying in 15 seconds", 15);
             updateStatus(true);
             ajaxmonitorrequest=false;
-            startAjax(15000);
+            startAjax(3000);
         }
      });
 }
