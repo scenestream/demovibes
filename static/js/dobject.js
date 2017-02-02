@@ -4,9 +4,9 @@ var ajaxmonitorrequest=false;
 var userIdleTime = 0;
 var updateThrottled = false;
 var updateTimer;
-var randBoost = 1000;
-// Every second.
-var successDelay = defaultSuccessDelay = 1000;
+var randBoost = 3000;
+// Every 5 seconds.
+var successDelay = defaultSuccessDelay = 5000;
 var throttledSuccessDelay = 240000;
 var userIdleLimit = 600;
 
@@ -59,7 +59,7 @@ function ajaxmonitorspawn() {
         type: 'GET',
         dataType: 'text',
         url: url,
-        timeout: 60100,
+        timeout: 30000,
         success: function(data, textStatus ){
             ajaxmonitorupdate(data);
         },
@@ -67,7 +67,8 @@ function ajaxmonitorspawn() {
             //newMessage("[Updater] Problem with server connection. Retrying in 15 seconds", 15);
             updateStatus(true);
             ajaxmonitorrequest=false;
-            startAjax(3000);
+            var randInt = Math.floor((Math.random()*randBoost));
+            startAjax(successDelay + randInt);
         }
      });
 }
