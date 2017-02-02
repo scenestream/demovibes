@@ -51,7 +51,7 @@ function updateStatus(error) {
 function ajaxmonitorspawn() {
     // resceive monitor events for objects on the page
     updateStatus(false);
-    var url=ajaxurl+'ping/'+ajaxeventid+'/';
+    var url=ajaxurl+'monitor/'+ajaxeventid+'/';
     // alert('Monitor for '+url);
     // old version: http://code.google.com/p/demovibes/issues/detail?id=47
     // ajaxmonitorrequest=$.get(url,ajaxmonitorupdate);
