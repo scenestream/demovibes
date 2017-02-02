@@ -4,8 +4,6 @@ import bottle
 import pickle
 import random
 
-import threading
-LOCK = threading.Lock()
 import hashlib
 
 try:
@@ -34,11 +32,8 @@ def http_event_receiver():
     return "OK"
 
 def event_receiver(obj, id):
-    LOCK.acquire()
     global event
     event = obj
-    uwsgi.green_unpause_all()
-    LOCK.release()
 
 uwsgi.message_manager_marshal = event_receiver
 
@@ -51,8 +46,10 @@ def handler(id):
         if hash != sign:
             userid = None
     id = int(id)
+    
     if not event or event[1] <= id:
-        uwsgi.green_pause(50 + random.randint(0,20) ) #Try to stop all from being "done" and re-request at the same time
+      yield ""
+      return
     myevent = event
     eventid = myevent[1]
     levent = [x[1] for x in myevent[0] if x[0] > id and (x[2] == "N" or (userid and x[2] == int(userid)))]
