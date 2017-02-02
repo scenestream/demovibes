@@ -69,6 +69,8 @@ FILTERS = {
     'bbcode': dv_extend.bbcode,
     'dv_urlize': dv_extend.dv_urlize,
     'mksafe': mksafe,
+    'ankhalize': dv_extend.ankhalize,
+    'antiankh': dv_extend.antiankh_filter,
     'custom_filters': dv_extend.custom_filters,
     'restricted_smileys': dv_extend.smileys_restricted,
 }

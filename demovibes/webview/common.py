@@ -176,6 +176,9 @@ def queue_song(song, user, event = True, force = False):
 
     if not force:
 
+        if user.get_profile().is_hellbanned():
+            result = False
+    
         if time_full:
             result = False
             models.send_notification("Song is too long. Remaining timeslot : %s. Next timeslot change: <span class='tzinfo'>%s</span>" %
@@ -253,7 +256,7 @@ def get_history(create_new=False):
     if not R or create_new:
         nowplaying = get_now_playing_song()
         limit = nowplaying and (nowplaying.id - 50) or 0
-        logger.info("No existing cache for history, making new one")
+        logger.debug("No existing cache for history, making new one")
         history = models.Queue.objects.select_related(depth=3).filter(played=True).filter(id__gt=limit).order_by('-time_played')[1:21]
         R = j2shim.r2s('webview/js/history.html', { 'history' : history })
         cache.set(key, R, 300)
@@ -266,7 +269,7 @@ def get_oneliner(create_new=False):
     logger.debug("Getting oneliner cache")
     R = cache.get(key)
     if not R or create_new:
-        logger.info("No existing cache for oneliner, making new one")
+        logger.debug("No existing cache for oneliner, making new one")
         lines = getattr(settings, 'ONELINER', 10)
         oneliner = models.Oneliner.objects.select_related(depth=2).order_by('-id')[:lines]
         R = j2shim.r2s('webview/js/oneliner.html', { 'oneliner' : oneliner })
@@ -279,7 +282,7 @@ def get_roneliner(create_new=False):
     logger.debug("Getting reverse oneliner cache")
     R = cache.get(key)
     if not R or create_new:
-        logger.info("No existing cache for reverse oneliner, making new one")
+        logger.debug("No existing cache for reverse oneliner, making new one")
         oneliner = models.Oneliner.objects.select_related(depth=2).order_by('id')[:15]
         R = j2shim.r2s('webview/js/roneliner.html', { 'oneliner' : oneliner })
         cache.set(key, R, 600)
@@ -292,7 +295,7 @@ def get_queue(create_new=False):
     logger.debug("Getting cache for queue")
     R = cache.get(key)
     if not R or create_new:
-        logger.info("No existing cache for queue, making new one")
+        logger.debug("No existing cache for queue, making new one")
         queue = models.Queue.objects.select_related(depth=2).filter(played=False).order_by('id')
         R = j2shim.r2s("webview/js/queue.html", { 'queue' : queue })
         cache.set(key, R, 300)

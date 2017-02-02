@@ -25,6 +25,7 @@ from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.core.cache import cache
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login
+from django.core import serializers
 
 import logging, datetime
 
@@ -628,7 +629,7 @@ def oneliner_submit(request):
     Add a text line to the oneliner.
     Returns user to referrer position, or to /
     """
-    message =  request.POST.get('Line').strip()
+    message =  request.POST['Line'].strip()
     common.add_oneliner(request.user, message)
     try:
         refer = request.META['HTTP_REFERER']
@@ -1034,6 +1035,35 @@ def activate_upload(request):
     songs = m.Song.objects.filter(status = "U").order_by('added')
     return j2shim.r2r('webview/uploaded_songs.html', {'songs' : songs}, request=request)
 
+import find_spammers
+class listUsers(WebView):
+    staff_required = True
+    template = "spam_userlist.html"
+
+    def pre_view(self):
+        self.nr = int(self.request.POST.get("number", "100"))
+	self.webtoo = self.request.POST.get("show_webpages")
+        self.s = find_spammers.find_spammers(m.User, self.nr, self.webtoo)
+
+    def POST(self):
+        mu = []
+        for x in self.s:
+	    if self.request.POST.get("user_%s_safe" % x.id):
+	       up = x.get_userprofile()
+	       up.safe = True
+	       up.save()
+	    elif self.request.POST.get("user_%s_delete" % x.id):
+	       x.delete()
+	       extra = serializers.serialize("json", [x.get_profile()])
+               logentry = self.request.user.get_profile().log(self.request.user, u"Deleted possible spammer '%s' (%s)" % (x.username, x.email))
+	       logentry.extra = extra
+	       logentry.save()
+               continue
+	    mu.append(x)
+	self.s = mu
+
+    def set_context(self):
+        return {'userlist': self.s, 'nr': self.nr, 'webtoo': self.webtoo and "checked" or ""}
 
 def showRecentChanges(request):
     # Get some default stat values
@@ -1852,3 +1882,15 @@ def upload_progress(request):
         return HttpResponse(simplejson.dumps(data))
     else:
         return HttpResponseServerError('Server Error: You must provide X-Progress-ID header or query param.')
+
+
+from registration import captcha
+def test_captcha(request):
+    if request.method == "POST":
+        form = captcha.get_form(f.forms, request.POST)
+        if form.is_valid():
+            return j2shim.r2r('webview/test_form.html', { 'form' : form, "msg":"Success" }, request=request)
+    else:
+        form = captcha.get_form(f.forms)
+    form.auto_set_captcha()
+    return j2shim.r2r('webview/test_form.html', { 'form' : form, "msg": "Do captcha" }, request=request)

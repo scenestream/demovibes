@@ -1,5 +1,4 @@
 import socket
-import logging
 import queuefetcher
 
 from django.core.management import setup_environ
@@ -8,7 +7,8 @@ import settings
 setup_environ(settings)
 max_length = getattr(settings, 'MAX_SONG_LENGTH', False)
 
-Log = logging.getLogger("Sockulf")
+#import logging
+Log = queuefetcher.logging.getLogger("dv.sockulf")
 
 class pyWhisperer(object):
     def __init__(self, host, port, timeout):
@@ -48,10 +48,13 @@ class pyWhisperer(object):
                         data = data.strip()
                         Log.debug("Got message : %s" % data)
                         if data in self.COMMANDS.keys():
-                                result = self.COMMANDS[data]()
-                                Log.debug("Returning data : %s" % result)
-                                while i < len(result):
+                                try:
+                                    result = self.COMMANDS[data]()
+                                    Log.debug("Returning data : %s" % result)
+                                    while i < len(result):
                                         i = i + self.conn.send(result)
+                                except:
+				    Log.exception("Command failed!")
                         else:
                                 Log.debug("Unknown command!")
                 else:
@@ -85,7 +88,9 @@ class pyWhisperer(object):
         return self.player.song.title.encode("utf-8")
 
     def command_getsong(self):
-        return self.player.get_next_song()
+        nextsong = self.player.get_next_song()
+        Log.debug("Sending filename %s to client", nextsong)
+        return nextsong
 
     def command_getloop(self):
         if max_length and self.player.song.song_length > max_length:
@@ -121,8 +126,7 @@ if __name__ == '__main__':
     PORT = int(options.port)
     TIMEOUT = None
 
-    logging.basicConfig(level=logging.WARNING)
-    Log.setLevel(logging.INFO)
+    Log.setLevel(queuefetcher.logging.DEBUG)
     server = pyWhisperer(HOST, PORT, TIMEOUT)
     server.listen()
 

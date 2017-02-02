@@ -103,7 +103,7 @@ class song_finder(object):
             try:
                 filepath = song.file.path.encode(self.sysenc)
             except:
-                filepath = song.file.path
+                filepath = song.file.path.encode("utf8")
         self.log.debug("Returning path %s" % filepath)
         return filepath
 

@@ -1,0 +1,8 @@
+#sidebar ul li {
+    width: 75px;
+    min-height: 18px;
+    float: left;
+    &:hover {
+        background-color: $bright-color;
+    }
+}

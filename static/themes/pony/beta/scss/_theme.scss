@@ -1,0 +1,398 @@
+@import "basic";
+
+$sitebg: #5bb448 !default;
+
+@mixin transition($time: 1s) {
+    -webkit-transition: all $time ease-in-out;
+    -moz-transition: all $time ease-in-out;
+    -o-transition: all $time ease-in-out;
+    -ms-transition: all $time ease-in-out;
+}
+
+@mixin transform($changes) {
+    -webkit-transform: $changes;
+    -moz-transform: $changes;
+    -o-transform: $changes;
+    -ms-transform: $changes;
+}
+
+@mixin olbackground($image) {
+    background-image: url($image);
+    background-repeat: no-repeat;
+    background-position: right center;
+}
+
+p {
+    margin: 3px 0;
+}
+
+.tagview_1 a {
+    font-size: 0.7em;
+    margin: 1px;
+}
+
+.tagview_2 a {
+    font-size: 1em;
+    margin: 2px;
+}
+
+.tagview_3 a {
+    font-size: 1.5em;
+    margin: 3px;
+}
+
+.tagview_4 a {
+    font-size: 2.2em;
+    margin: 4px;
+}
+.forumName {
+    font-size: 1.2em;
+}
+
+.bbquote {
+    border-left: 3px solid $dark-color;
+    b:first-child {
+        display: block;
+    }
+}
+
+#main h1 {
+    display: none;
+}
+
+body#site {
+    background-color: $sitebg;
+    background-repeat:repeat-x;
+    color: $text-color;
+    font-size:0.9em;
+    font-family: Georgia,"Times New Roman",serif;
+    line-height: 140%;
+}
+
+#sidebar, #main, #rightside, .messagesettingsbox {
+    margin-top: $sides-margin;
+    background-color: fade-out($bright-color, 0.13);
+    border: 1px solid lighten($dark-color, 20%);
+}
+
+.messagesettingsbox {
+    background-color: $bright-color;
+}
+
+.olh_user {
+    border: 1px solid $dark-color;
+    border-top-left-radius: 10px;
+    padding-left: 0.5em;
+    background-color: darken($bright-color, 10%);
+    border-top-right-radius: 10px;
+    br {
+        display: none;
+    }
+    .username {
+        margin-right: 1em;
+    }
+}
+.olh_message {
+    @include linear-gradient(lighten($bright-color, 11%), lighten($bright-color, 3%));
+    border: 1px solid $dark-color;
+    border-top: none;
+    padding-left: 1em;
+    padding-top: 3px;
+    margin-bottom: 0.5em;
+}
+
+h3, h2 {
+    font-size: 1em;
+    padding: 5px;
+    margin-bottom: 4px;
+    background-color: lighten($bright-color, 10%);
+    color: $dark-color;
+    text-shadow: 1px 1px 3px darken($dark-color, 10%);
+    border: 1px solid;
+    img {
+        display: none;
+    }
+    @include linear-gradient(lighten($bright-color, 17%), lighten($bright-color, 7%));
+    box-shadow:         2px 2px 2px rgba(50, 50, 50, 0.25);
+}
+
+h3 {
+    margin-left: -($sides-padding + ($sides-margin / 2));
+    margin-right: -($sides-padding + ($sides-margin / 2));
+    margin-top: -1px;
+}
+
+p.onelinermsg {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    margin-right: 2px;
+    // We use blocks here, so no need for linebreak
+    br {
+        display: none;
+    }
+}
+.newslist .newsentry .date {
+    float: right;
+}
+
+span.onelinertext {
+    display: block;
+    box-shadow:         2px 2px 4px rgba(50, 50, 50, 0.25);
+    overflow: auto;
+    border-radius: 12px;
+    padding: 6px;
+    padding-top: 3px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    background-color: lighten($bright-color, 8%);
+    border: 1px solid darken($bright-color, 12%);
+    border-top: None;
+    @include radial-gradient(lighten($bright-color, 13%), lighten($bright-color, 7%), $color1start: 20%);
+}
+span.onelinertime {
+    color: darken($bright-color, 20%);
+    font-size: 90%;
+}
+
+span.onelinertime:hover {
+    color: $text-color;
+}
+
+span.onelinerpre {
+    box-shadow:         2px 2px 4px rgba(50, 50, 50, 0.25);
+    border-radius:6px;
+    padding: 3px;
+    display: block;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background-color: lighten($bright-color, 20%);
+    border: 1px solid darken($bright-color, 12%);
+}
+
+a {
+    color: darken($dark-color, 5%);
+    text-decoration: none;
+    &:visited { color: $dark-color; }
+    &:hover { color: lighten($dark-color, 15%); }
+}
+
+table {
+    width: 97%;
+    margin: auto;
+    th {
+        background-color: darken($bright-color, 10%);
+        border: 1px solid $dark-color;
+        font-size: 0.8em;
+        padding: 0 0.6em;
+        a {
+            color: $text-color;
+        }
+    }
+    td {
+        vertical-align: top;
+        font-size: 0.85em;
+        border: 1px solid $dark-color;
+        background-color: lighten($bright-color, 10%);
+        padding: 0.5em;
+        img {
+            max-width: 100%;
+        }
+        @include radial-gradient(lighten($bright-color, 22%), lighten($bright-color, 11%), center top, ellipse cover, 10%)
+    }
+    .djangoForumThreadPostDetail {
+        width: 120px;
+        max-width: 120px;
+        overflow: hidden;
+        background-color: lighten($bright-color, 15%);
+    }
+    tr.postfooter {
+        background-color: $bright-color;
+        td {
+            background-color: brighten($bright-color, 10%);
+            background-image: none;
+        }
+    }
+    &.vote {
+        margin: auto;
+        width: auto;
+        td {
+            padding: 0;
+            background: none;
+            border: none;
+        }
+    }
+    &.recentchanges tr {
+        font-size: 1em;
+    }
+    &.recentchanges > tbody > tr > td {
+        font-size: 1em;
+        background: none;
+            border: none;
+    }
+}
+
+textarea {
+    @include radial-gradient(lighten($bright-color, 10%), lighten($bright-color, 22%), $color1start: 10%, $stop: farthest-corner, $start: right bottom);
+    width: 99%;
+    margin: auto;
+}
+
+input[type="button"],input[type="submit"] {
+    padding: 0.5em 1em;
+    border: 1px solid darken($bright_color, 10%) !important;
+    box-shadow:         2px 2px 6px rgba(50, 50, 50, 0.25);
+    margin: 4px;
+    border-radius: 17px;
+    @include linear-gradient(lighten($bright-color, 16%), lighten($bright-color, 3%));
+    &:hover {
+        border: 1px solid darken($bright_color, 7%) !important;
+        @include linear-gradient(lighten($bright-color, 20%), lighten($bright-color, 7%));
+    }
+}
+
+#whosonline {
+    border: 1px solid darken($bright_color, 10%);
+    margin: 0 0.3em;
+    padding: 0.4em;
+    border-radius: 16px;
+    @include radial-gradient(lighten($bright-color, 16%), lighten($bright-color, 5%), $color1start: 40%, $stop: farthest-corner);
+    box-shadow:         2px 2px 8px rgba(50, 50, 50, 0.25);
+}
+
+// Song voting display
+.starview {
+    height: 37px;
+    .starbutton {
+        font-size: 0;
+        width: 29px;
+        height: 36px;
+    }
+}
+
+// Oneliner input text element
+#blah {
+    width: 100%;
+    margin-left: -$sides-padding;
+    margin-right: -$sides-padding;
+    font-size: 0.65em;
+    background-color: darken($bright-color, 10%);
+    border: 1px solid $dark-color;
+    padding: 2px;
+}
+
+//Oneliner submit button
+#makeitso {
+    display: none;
+}
+h2 {
+    padding-left: 1em;
+    margin-top: 1em;
+}
+
+// Read Private Message display
+$pmpadding: 0.5em;
+.pm_content {
+    .pmtitle {
+        padding:0;
+        margin:0;
+        font-size: 1.2em;
+    }
+    padding: $pmpadding;
+    border: 1px solid $dark-color;
+    margin-top: 1em;
+    background-color: darken($bright-color, 10%);
+    .pmview {
+            background-color: lighten($bright-color, 7%);
+            @include radial-gradient(lighten($bright-color, 22%), lighten($bright-color, 11%), top left, circle farthest-corner, 20%);
+            margin-left: -$pmpadding;
+            margin-right: -$pmpadding;
+            margin-bottom: -$pmpadding;
+            border-top: 1px solid $dark-color;
+            padding: $pmpadding * 2;
+            p {
+                margin: 0;
+                padding: 0;
+            }
+    }
+}
+
+img.countryflag {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+#rightside,#sidebar {
+    ul li {
+        background-image: none;
+    }
+}
+
+#screenshotview {
+    img {
+        border: 1px solid;
+        padding: 7px;
+        background-color: lighten($bright-color, 10%);
+        border-radius: 5px;
+    }
+}
+
+$mbox-border: 3px solid $dark-color;
+
+// Top screen message display box
+.messagebox {
+    left: $main-margin;
+    right: $main-margin;
+    top: 0;
+    width: auto;
+    .messagetitle {
+        border: $mbox-border;
+        border-bottom: none;
+        background-color: lighten($bright-color, 15%);
+    }
+    .messagelist {
+        .messageholder {
+            opacity: .95;
+            background-color: lighten($bright-color, 10%);
+            border-left: $mbox-border;
+            border-right: $mbox-border;
+        }
+        .messageholder:last-child {
+           border-bottom: $mbox-border;
+        }
+    }
+}
+
+.theme {
+    border: 1px outset darken($bright-color, 10%);
+    @include radial-gradient(lighten($bright-color, 22%), lighten($bright-color, 11%), top left, circle farthest-corner, 20%);
+    margin: 2px;
+    height: 260px;
+    div {
+        padding-top: 2px;
+    }
+}
+
+.smileybox-smiley {
+    min-height: 60px;
+    &:hover {
+        border: 2px solid #999;
+        box-shadow: 1px 1px 5px #999;
+        border-radius: 4px;
+    }
+    &:hover img {
+        margin: -1px;
+        border: 1px solid #aaa;
+    }
+}
+
+.activetheme {
+    height: 260px;
+    border: 1px outset darken($bright-color, 13%);
+    @include radial-gradient(lighten($bright-color, 32%), lighten($bright-color, 21%), top left, circle farthest-corner, 20%);
+}
+.themename {
+    font-size: 1.2em;
+}
+
+@import "ponies";
+@import "mobile";

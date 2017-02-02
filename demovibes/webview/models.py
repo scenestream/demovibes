@@ -170,7 +170,7 @@ def add_event(event = None, user = None, eventlist = [], metadata = {}):
                     r = urllib.urlopen(url, data)
                 except:
                     return False
-                return r.read()
+                return r
             else:
                 uwsgi.send_uwsgi_message(uwsgi_event_server[0], uwsgi_event_server[1], 33, 17, data, 30)
 
@@ -371,7 +371,7 @@ class Userprofile(models.Model):
     infoline = models.CharField(blank = True, max_length = 50)
     info = models.TextField(blank = True, verbose_name="Profile Info", help_text="Enter a little bit about yourself. No HTML. BBCode tags allowed")
     last_active = models.DateTimeField(blank = True, null = True)
-    last_changed = models.DateTimeField(default=datetime.datetime.now())
+    last_changed = models.DateTimeField(auto_now=True)
     last_activity = models.DateTimeField(blank = True, null = True, db_index=True)
     location = models.CharField(blank = True, max_length=40, verbose_name="Hometown Location")
     paginate_favorites = models.BooleanField(default = True)
@@ -744,6 +744,7 @@ class Logo(models.Model):
     active = models.BooleanField(default=True, db_index=True)
     creator = models.CharField(max_length=60)
     description = models.TextField(blank = True)
+    legacy = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.description or self.creator
@@ -918,7 +919,7 @@ class ObjectLog(models.Model):
     obj = generic.GenericForeignKey('content_type', 'object_id')
 
     user = models.ForeignKey(User)
-    added = models.DateTimeField(default=datetime.datetime.now())
+    added = models.DateTimeField(auto_now=True)
     text = models.TextField()
     extra = models.TextField(blank=True)
 
@@ -1699,6 +1700,9 @@ class Queue(models.Model):
             return self.playtime
         return eta
 
+    class Meta:
+        ordering = ["-id"]
+
     def set_eta(self):
         """
         Store expected time to play to the object.
@@ -1719,7 +1723,7 @@ class SongComment(models.Model):
         return self.comment
         
     class Meta:
-        ordering = ['-added']
+        ordering = ['added']
 
 class Favorite(models.Model):
     song = models.ForeignKey(Song)

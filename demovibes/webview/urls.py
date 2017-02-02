@@ -5,7 +5,7 @@ from demovibes.webview import views
 import djangojinja2
 
 oneliner_dict = {
-    'queryset': Oneliner.objects.all(),
+    'queryset': Oneliner.objects.all()[:600],
     'template_loader': djangojinja2._jinja_env,
 }
 
@@ -216,6 +216,8 @@ urlpatterns = patterns('',
     url(r'^faq/(?P<object_id>\d+)/$',           'django.views.generic.list_detail.object_detail', faq_dict, name = "dv-faqitem"),
 
     # Statistics & Cache stuff
+    url(r'^spammers/$',                             views.listUsers(), name = "dv-spammerlist"),
+    url(r'^spammers/ctest/$',                       views.test_captcha, name = "dv-spammerlist-captcha"),
     url(r'^status/cache/$',                    'demovibes.webview.views.memcached_status', name = "dv-memcached"), # Show memcached status
 
 )

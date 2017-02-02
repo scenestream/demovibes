@@ -1,0 +1,33 @@
+// START Ajax refresh status
+    .updatesActive h3 {
+        @include olbackground("images/smile_small.png");
+    }
+
+    .updatesIdle h3 {
+        @include olbackground('images/sleeping.png');
+    }
+
+    .updatesError h3 {
+        @include olbackground('images/twilight_av.PNG');
+    }
+// END Ajax refresh status
+
+body#site {
+    background-image: url("images/bg1.jpg");
+}
+
+// Song voting display
+.starview {
+    .starbutton {
+        background-image: url("images/star2.png");
+    }
+    .star-selected, .starbutton:hover {
+       background-image: url("images/star1.png");
+    }
+}
+
+#sidebar {
+    background-image: url("images/pony1.png");
+    background-repeat: no-repeat;
+    background-position:center top;
+}

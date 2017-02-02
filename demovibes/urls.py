@@ -9,7 +9,8 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Example:
     (r'^$', 'django.views.generic.simple.redirect_to', {'url': '/demovibes/'}),
-    (r'^accounts/profile/$', 'django.views.generic.simple.redirect_to', {'url': '/demovibes/'}),
+    #(r'^$', 'django.views.generic.simple.redirect_to', {'url': '/static/biebervibes/'}),  # April 1st 2015
+    (r'^accounts/profile/$', 'django.views.generic.simple.redirect_to', {'url': 'http://www.scenemusic.net/demovibes/'}),
     (r'^accounts/logout/$', 'webview.views.log_out'),
     (r'^demovibes/', include('demovibes.webview.urls')),
     (r'^openid/', include('demovibes.openid_provider.urls')),

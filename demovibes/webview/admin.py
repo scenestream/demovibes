@@ -2,6 +2,11 @@ from demovibes.webview.models import *
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
+class LogoAdmin(admin.ModelAdmin):
+	search_fields = ["creator", "description"]
+	list_display = ["id", "creator"]
+	list_filter = ["active", "legacy"]
+
 class CompilationSongInline(admin.TabularInline):
     model = CompilationSongList
     raw_id_fields = ["song"]
@@ -63,7 +68,7 @@ class SongAdmin(admin.ModelAdmin):
 
 class QueueAdmin(admin.ModelAdmin):
     list_display = ('song', 'requested', 'played', 'requested_by', 'priority', 'playtime')
-    search_fields = ['song', 'requested', 'requested_by']
+    search_fields = ['song', 'requested_by__username']
     list_filter = ['priority', 'played']
     date_hierarchy = 'time_played'
     fields = ['song', 'played', 'requested_by', 'priority', 'playtime', 'time_played']
@@ -162,7 +167,7 @@ admin.site.register(News, NewsAdmin)
 admin.site.register(Artist, ArtistAdmin)
 admin.site.register(Userprofile, UserprofileAdmin)
 admin.site.register(SongPlatform)
-admin.site.register(Logo)
+admin.site.register(Logo, LogoAdmin)
 admin.site.register(GenericBaseLink, GBLAdmin)
 admin.site.register(Queue, QueueAdmin)
 admin.site.register(SongComment, SongCommentAdmin)

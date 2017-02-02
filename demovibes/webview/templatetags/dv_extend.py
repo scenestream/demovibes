@@ -21,6 +21,14 @@ STATIC = settings.MEDIA_URL
 
 register = template.Library()
 
+import ankhalizer
+import antiankh
+
+
+
+def ankh_filter(text):
+	return ankhalizer.ankhalizer(text)
+
 def user_based_filter(userlist):
     def func1(function):
         def func2(data, user):
@@ -29,6 +37,10 @@ def user_based_filter(userlist):
             return data
         return func2
     return func1
+
+@user_based_filter(getattr(settings,'ANTIANKH', []))
+def antiankh_filter(text):
+    return antiankh.antiankhalizer(text)
 
 class BetterPaginator(Paginator):
     """
@@ -154,7 +166,14 @@ def get_online_users():
     if not result:
         timefrom = datetime.datetime.now() - datetime.timedelta(minutes=5)
         userlist = Userprofile.objects.filter(last_activity__gt=timefrom).order_by('user__username')
-        newuser = User.objects.filter(is_active=True).order_by('-date_joined')[0]
+        #userlist = [x for x in userlist if not x.is_hellbanned()]
+        userlist = [x for x in userlist]
+        newusers = User.objects.filter(is_active=True).order_by('-date_joined')[:20]
+        newuser = newusers[0]
+        for x in newusers:
+            if not x.get_profile().is_hellbanned():
+                newuser = x
+                break
 
         # Stuff this into an object
         result = js.r2s('webview/whos_online_sb.html', { 'userlist' : userlist, 'newuser' : newuser })
@@ -688,7 +707,10 @@ class GetCss(template.Node):
         self.user = user
 
     def render(self, context):
-        user = template.resolve_variable(self.user, context)
+        try:
+		user = template.resolve_variable(self.user, context)
+	except:
+		user = None
         return get_css_for_user(user)
 
 def j_get_post_count(user):
@@ -1219,7 +1241,6 @@ def removesmileys(value):
     value = REMSM.sub("", value)
     return value
 
-
 @register.filter
 def bbcode(value):
     """
@@ -1352,6 +1373,10 @@ def getattrs (obj, args):
         return attr
 
 @register.filter
+def ankhalize(text):
+	return ankh_filter(text)
+
+@register.filter
 def dv_urlize(text):
     """
     Simplified replacement of the urlize filter in Django, which at present offers no option
@@ -1381,6 +1406,9 @@ def dv_urlize(text):
     # Return the results of the conversion
     return link
 
+def bb_ankhify(hit):
+	data = hit.group(1)
+	return ankh_filter(data)
 
 bbdata_shared = [
         (r'\[url\]((http|https|ftp|/).+?)\[/url\]', r'<a href="\1" target="_blank">\1</a>'),
@@ -1413,7 +1441,7 @@ bbdata_shared = [
 
         # For those who want a bit extra pazazz, we can specify a HTML compliant
         # Colour code in the form of #00FF00 to be used. Handy for text effects.
-        (r'\[color=#([0-9A-Fa-f]{6})\](.+?)\[/color\]', r'<span style="color:"\1;">\2</span>'),
+        (r'\[color=#([0-9A-Fa-f]{6})\](.+?)\[/color\]', r'<span style="color:#\1;">\2</span>'),
 
         # Demovibes specific BB tags
         (r'\[user\](.+?)\[/user\]', bb_user), #1
@@ -1442,6 +1470,7 @@ bbdata_oneliner = bbdata_shared + [
         (r'\[big\](.+?)\[/big\]', r'<big>\1</big>'),
         (r'\[small\](.+?)\[/small\]', r'<small>\1</small>'),
 
+		(r'\[ankh\](.+?)\[/ankh\]', bb_ankhify),
 
         #Rather silly stuff, really
         (r'\[silly1\](.+?)\[/silly1\]', r'<span class="silly1">\1</span>'),

@@ -2,6 +2,7 @@
   <socket>127.0.0.1:3031</socket>
   <module>uwsgi-launcher</module>
   <processes>3</processes>
+  <harakiri>10</harakiri>
   <master/>
   <disable-logging/>
   <daemonize>/tmp/demovibes-uwsgi.log</daemonize>

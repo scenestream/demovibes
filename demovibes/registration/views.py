@@ -11,7 +11,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext, Context, loader
 from django.core.mail import EmailMessage
 
-from registration.forms import RegistrationForm, RegistrationFormNoFreeEmail
+from registration.forms import RegistrationForm, RegistrationFormNoFreeEmail, forms
 from registration.models import RegistrationProfile
 from django.contrib.sites.models import Site
 
@@ -20,9 +20,51 @@ from webview.models import OnelinerMuted
 import j2shim
 import datetime
 
+import logging
+
+L = logging.getLogger("dv.registration")
+
+from registration import captcha
+
+from django.contrib.admin.views.decorators import staff_member_required
 
 class RegistrationFormNoFreeEmailFromSetting(RegistrationFormNoFreeEmail):
     bad_domains = getattr(settings, "BAD_EMAIL_DOMAINS", [])
+
+def send_email(mail_to, subject, content):
+           email = EmailMessage(
+                    subject=subject,
+                    body=content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[mail_to])
+           email.send(fail_silently=True)
+
+@staff_member_required
+def activate2(request):
+    aq = RegistrationProfile.objects.filter(user__is_active=False, activation_key="ALREADY_ACTIVATED").order_by("-id")
+    c = {
+        "accounts": aq
+    }
+    if request.method == 'POST':
+        profileid = request.POST.get("okid")
+        a_activate = request.POST.get("doactivate")
+        a_remove = request.POST.get("doremove")
+        p = RegistrationProfile.objects.get(id=profileid)
+        u = p.user
+        up = u.get_profile()
+        if a_activate:
+            u.is_active = True
+            u.save()
+            up.log(request.user, "Account activated")
+            send_email(u.email, "Account active", "Your account on Nectarine is now active :)")
+        if a_remove:
+            p.activation_key="DEACTIVATED"
+            p.save()
+            up.log(request.user, "Account Denied")
+        HttpResponseRedirect(reverse("registration_activate2"))
+    context = RequestContext(request)
+    return render_to_response("registration/activate2.html", c, context_instance=context)
+
 
 def activate(request, activation_key,
              template_name='registration/activate.html',
@@ -215,15 +257,27 @@ def register(request, success_url=None,
             }
             return j2shim.r2r('webview/muted.html', {'muted' : d}, request)
         form = form_class(data=request.POST, files=request.FILES)
+        cform = captcha.get_form(forms, request.POST)
         if form.is_valid():
-            new_user = form.save(profile_callback=profile_callback)
-            # success_url needs to be dynamically generated here; setting a
-            # a default value using reverse() will cause circular-import
-            # problems with the default URLConf for this application, which
-            # imports this file.
-            return HttpResponseRedirect(success_url or reverse('registration_complete'))
+            if cform.is_valid():
+                new_user = form.save(profile_callback=profile_callback)
+                # success_url needs to be dynamically generated here; setting a
+                # a default value using reverse() will cause circular-import
+                # problems with the default URLConf for this application, which
+                # imports this file.
+                L.info("New user %s - gave captcha answer %s, IP %s", new_user.username, cform.cleaned_data["answer"], userip)
+                return HttpResponseRedirect(success_url or reverse('registration_complete'))
+            else:
+                a = request.POST.get("answer")
+                if a:
+                    L.info("Captcha failed - answer was '%s'. IP %s", a, userip)
+
     else:
         form = form_class()
+        cform = captcha.get_form(forms)
+    
+    cform.auto_set_captcha()
+    L.info("Setting captcha %s", cform.fields['answer'].label)
 
     if extra_context is None:
         extra_context = {}
@@ -231,5 +285,5 @@ def register(request, success_url=None,
     for key, value in extra_context.items():
         context[key] = callable(value) and value() or value
     return render_to_response(template_name,
-                              { 'form': form },
+                              { 'form': form, "cform": cform },
                               context_instance=context)

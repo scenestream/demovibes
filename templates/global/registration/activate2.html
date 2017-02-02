@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+
+{% block main %}
+<h2><img class="icon_header" src="{{ MEDIA_URL }}tick.png" alt="" />Accounts to activate</h2>
+
+<table>
+{% for p in accounts %}
+<tr>
+    <td>{{ p.user.username }}</td>
+    <td>{{ p.user.email }}</td>
+    <td>{{ p.user.date_joined }}</td>
+    <td>
+        <form method="post" action=".">
+            <input type="hidden" name="okid" value="{{ p.id }}">
+            <input type="submit" value="Activate" name="doactivate">
+            <input type="submit" value="Remove" name="doremove">
+        </form>
+    </td>
+</tr>
+{% endfor %}
+</table>
+</form>
+{% endblock %}

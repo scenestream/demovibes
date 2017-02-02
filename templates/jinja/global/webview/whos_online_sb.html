@@ -1,10 +1,10 @@
 {% import "macro/display.html" as display -%}
 {{ ngettext("There is a total of %(num)d user online now:", "There are a total of %(num)d users online now", userlist|count) }}:<br /><br />
 
-{% if userlist.count() != 0 %}
+{% if userlist %}
  <div id="whosonline" class="whosonline">
-    {% for U in userlist.all() %}
-     {{ display.user(U.user) }}{% if loop.last %} {% else %}, {% endif %}
+    {% for U in userlist %}
+     {{ display.user(U.user) }}{% if loop.last %}{% else %}, {% endif %}
     {% endfor %}
  </div>
 {% if newuser %}<br /><div id="newestuser" class="newestuser">Our Newest User:<br />{{ display.user(newuser) }}</div>{% endif %}

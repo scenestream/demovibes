@@ -31,11 +31,19 @@ def queue(request):
         {'now_playing': now_playing, 'history': history, 'queue': queue}, \
         context_instance=RequestContext(request), mimetype = "application/xml")
 
-
+@cache_page(15)
+def oneliner_old(request):
+    try:
+        oneliner_data = Oneliner.objects.select_related(depth=1).order_by('-id')[:20]
+    except:
+        return "Invalid Oneliner Data"
 
 def oneliner(request):
     data = make_oneliner_xml()
-    return HttpResponse(data, content_type="application/xml")
+    r = HttpResponse(data, content_type="application/xml")
+    r["Access-Control-Expose-Headers"] = "Date"
+    r["Access-Control-Allow-Origin"] = "*"
+    return r
     return render_to_response('webview/xml/oneliner.xml', \
         {'oneliner_data' : oneliner_data}, \
         context_instance=RequestContext(request), mimetype = "application/xml")

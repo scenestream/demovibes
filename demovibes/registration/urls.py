@@ -12,7 +12,7 @@ from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 from django.contrib.auth import views as auth_views
 
-from registration.views import activate
+from registration.views import activate, activate2
 from registration.views import register
 
 
@@ -27,6 +27,9 @@ urlpatterns = patterns('',
                        url(r'^password/change/$',
                            auth_views.password_change,
                            name='auth_password_change'),
+                       url(r'^activates/$',
+                           activate2,
+                           name="registration_activate2"),
                        url(r'^password/change/done/$',
                            auth_views.password_change_done,
                            name='auth_password_change_done'),

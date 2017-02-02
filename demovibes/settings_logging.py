@@ -16,7 +16,16 @@ LOGGING = {
         'file': {
             'level': "DEBUG",
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(LOG_ROOT, 'demovibes.log'),
+            'filename': '/home/demovibes/logs/demovibes/demovibes.log',
+            'maxBytes': 5 * 1024 ** 2,
+            'backupCount': 0,
+            'encoding': "utf8",
+            'formatter': 'verbose'
+        },
+        'ifile': {
+            'level': "INFO",
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/home/demovibes/logs/demovibes/demovibes_info.log',
             'maxBytes': 5 * 1024 ** 2,
             'backupCount': 0,
             'encoding': "utf8",
@@ -43,7 +52,7 @@ LOGGING = {
             'propagate': True,
         },
         'dv': {
-            'handlers': ["file"],
+            'handlers': ["file", "ifile"],
             'level': "DEBUG",
         }
     }

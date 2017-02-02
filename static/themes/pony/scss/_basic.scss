@@ -1,0 +1,149 @@
+$sides-size: 220px;
+$sides-margin: 8px;
+$sides-padding: 4px;
+$maincontent-padding: 5px;
+
+$main-margin : $sides-size + ($sides-margin * 2) + ($sides-padding * 2) + 1;
+
+@mixin radial-gradient($color1, $color2, $start: center, $stop: ellipse closest-side, $color1start: 0%, $color2start: 100%) {
+    background-image: -webkit-radial-gradient($start, $stop, $color1 $color1start, $color2 $color2start);
+    background-image: -o-radial-gradient($start, $stop, $color1 $color1start, $color2 $color2start);
+    background-image: -moz-radial-gradient($start, $stop, $color1 $color1start, $color2 $color2start);
+    background-image: -ms-radial-gradient($start, $stop, $color1 $color1start, $color2 $color2start);
+    background-image: radial-gradient($start, $stop, $color1 $color1start, $color2 $color2start);
+}
+
+@mixin linear-gradient($color1, $color2, $start: top, $color1start: 0%, $color2start: 100%) {
+    background-image: -webkit-linear-gradient($start, $color1 $color1start, $color2 $color2start);
+    background-image: -moz-linear-gradient($start, $color1 $color1start, $color2 $color2start);
+    background-image: -o-linear-gradient($start, $color1 $color1start, $color2 $color2start);
+    background-image: -ms-linear-gradient($start, $color1 $color1start, $color2 $color2start);
+    background-image: linear-gradient($start, $color1 $color1start, $color2 $color2start);
+}
+
+@mixin center-block {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h3,h2 {
+    margin: 0;
+    padding: 3px;
+    margin-left: -$sides-padding;
+    margin-right: -$sides-padding;
+}
+
+table {
+    border-collapse: collapse;
+    td {
+
+    }
+}
+
+#oneliner {
+    overflow: auto;
+}
+
+@mixin menulist {
+    ul {
+        padding: 0;
+        margin-top: 1ex;
+        margin-bottom: 2ex;
+        display: inline-block;
+        list-style-type: none;
+        text-align: left;
+
+        li {
+            background-position: 0px 50%;
+            background-repeat: no-repeat;
+            min-height: 20px;
+            padding-left: 23px;
+            display: block;
+        }
+        li:hover {
+            background-image: url("images/rainbow_dash.png");
+        }
+    }
+}
+@mixin sidebars {
+    @include menulist;
+    text-align: center;
+    width: $sides-size;
+    margin-left: $sides-margin;
+    margin-right: $sides-margin;
+    padding: $sides-padding;
+    padding-top: 0;
+}
+body#site {
+    width: auto;
+    margin: 0;
+    padding: 0;
+    top:0;
+    left:0;
+    right: 2px;
+    position:absolute;
+}
+#sidebar {
+    @include sidebars;
+    float: left;
+    #oneliner {
+        text-align: left;
+    }
+}
+
+#rightside {
+    @include sidebars;
+    float: right;
+}
+
+#footer {
+    clear: both;
+    padding: 10px;
+    height: 1em;
+    #copyright {
+        float: right;
+    }
+    #copyleft {
+        float: left;
+    }
+}
+#main {
+    #maincontent {
+        padding: $maincontent-padding;
+    }
+    margin-left: $main-margin;
+    margin-right: $main-margin;
+}
+
+#logo {
+    @include center-block;
+    overflow: hidden;
+    padding-top: 1em;
+}
+
+#djangoForumThreadPosts {
+    width: 99%;
+}
+
+#djangoForumList {
+    .djangoForumStats { float: right; }
+    .djangoForumListDetails {
+        width: 70%;
+    }
+    .djangoForumListLastPost {
+        width: 30%;
+    }
+}
+.username,.songname,.artistname {
+    img {
+        margin-right: 3px;
+        margin-left: 3px;
+    }
+}
+
+.username {    white-space: nowrap;}
+
+a img {
+    border: 0;
+}
