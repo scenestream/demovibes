@@ -24,7 +24,9 @@ import logging
 
 L = logging.getLogger("dv.registration")
 
+"""
 from registration import captcha
+"""
 
 from django.contrib.admin.views.decorators import staff_member_required
 
@@ -257,8 +259,13 @@ def register(request, success_url=None,
             }
             return j2shim.r2r('webview/muted.html', {'muted' : d}, request)
         form = form_class(data=request.POST, files=request.FILES)
+        """
         cform = captcha.get_form(forms, request.POST)
+        """
         if form.is_valid():
+            new_user = form.save(profile_callback=profile_callback)
+            return HttpResponseRedirect(success_url or reverse('registration_complete'))
+        """if form.is_valid():
             if cform.is_valid():
                 new_user = form.save(profile_callback=profile_callback)
                 # success_url needs to be dynamically generated here; setting a
@@ -271,13 +278,18 @@ def register(request, success_url=None,
                 a = request.POST.get("answer")
                 if a:
                     L.info("Captcha failed - answer was '%s'. IP %s", a, userip)
+        """
 
     else:
         form = form_class()
+        """
         cform = captcha.get_form(forms)
+        """
     
+    """
     cform.auto_set_captcha()
     L.info("Setting captcha %s", cform.fields['answer'].label)
+    """
 
     if extra_context is None:
         extra_context = {}
@@ -285,5 +297,5 @@ def register(request, success_url=None,
     for key, value in extra_context.items():
         context[key] = callable(value) and value() or value
     return render_to_response(template_name,
-                              { 'form': form, "cform": cform },
+                              { 'form': form },
                               context_instance=context)
