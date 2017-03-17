@@ -373,6 +373,10 @@ padding: 2px;
 clear: both;
 }
 
+#makeitso {
+    background-repeat: no-repeat;
+}
+
 .onelinertools > span {
     margin-right: 4px;
 }
