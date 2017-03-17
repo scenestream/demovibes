@@ -4,7 +4,7 @@
  ** This stylesheet is PUBLIC DOMAIN.
  **
  ** All referenced images subject to the license of the demovibes project:
- ** http://code.google.com/p/demovibes/
+ ** https://github.com/arabek/demovibes
  **
  **/
 
@@ -419,26 +419,15 @@ a img {
 
 /* I only changed the background-color, but I pulled all the styles in here. It's harder to override inline styles */
 hr {
-	width: 80% !important;
-	height: 1px !important;
+	height: 0px !important;
 	border: 0px none !important;
-	background-color: #444 !important;
 }
 
-/*
-   This is one reason I dislike browser prefixes wrt "experimental" support for CSS styles. Also, what happens to
-   those developers that forgot to put in the standard declaration when the browser deprecates (and removes) the
-   experimental style? Interestingly enough, I'm with IE on this one, as they don't follow this trend. Thank you IE!
-   
-   Don't worry, I won't write this rant each time :P
- */
 #sidebar, #rightside, #main {
 	margin-bottom: 10px;
 	padding-left: 1em;
 	padding-right: 1em;
-	border-radius: 2px 2px 2px 2px;
-	-moz-border-radius: 2px 2px 2px 2px;
-	-webkit-border-radius: 2px 2px 2px 2px;
+	border-radius: 5px 5px 5px 5px;
 	border: 1px solid #37C;
 	background-color: #006599;
 }
@@ -446,6 +435,7 @@ hr {
 #sidebar, #rightside {
 	width: 230px;
 	text-align: center;
+    padding-bottom: 5pt;
 }
 
 /*
@@ -454,7 +444,6 @@ hr {
  */
 #sidebar {
 	float: left;
-	padding-bottom: 1em;
 }
 
 /* This is what makes all the website's section headings appear as a right-aligned, underlined title */
@@ -465,7 +454,7 @@ hr {
 	font-size: 10pt;
 	font-weight: bold;
 	text-align: right;
-	border-bottom: 1px solid #444;
+	border-bottom: 1px solid #FC3;
 	background-position: 100% 0;
 	background-repeat: no-repeat;
 }
@@ -473,7 +462,6 @@ hr {
 /* Since the tops of our sidebars are curved, the underlines we defined above don't work so well here */
 #sidebar h3:first-child, #rightside h3:first-child {
 	margin-top: .5em;
-	border-bottom: none;
 }
 
 #sidebar ul, #rightside ul {
@@ -522,7 +510,7 @@ hr {
 }
 
 #rightside form input[type=button] {
-	border: 1px solid #444;
+	border: 1px solid #FC3;
 	cursor: pointer;
 }
 
