@@ -13,7 +13,7 @@ hBiasBase = 0.1
 # Also, m should be positive.  If m is negative, then the model will invert
 # its behavior, which is outside its design specifications (i.e. the behavior
 # will be unspecified).
-m = 0.2
+m = 0.4
 
 # Default vote value for unvoted songs.  If less than 5, then the model has a
 # wedge in the lock time function for unrated songs.  Wedges are not bad, just
@@ -25,7 +25,7 @@ unvoted_songs_value = 4
 # rating could be skewed because of the preference of just a handful of users.
 # As the vote count increases, this effect will fade.  Setting this to zero
 # disables the vote de-penalty.
-vote_bias = 0.2
+vote_bias = 0.1
 
 # Vote bias fade power.  This number should be greater than 1.  With a fade
 # power of 2, the vote bias above will be short lived.  By default, we set this
