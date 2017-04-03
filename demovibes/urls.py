@@ -10,14 +10,14 @@ urlpatterns = patterns('',
     # Example:
     (r'^$', 'django.views.generic.simple.redirect_to', {'url': '/demovibes/'}),
     #(r'^$', 'django.views.generic.simple.redirect_to', {'url': '/static/biebervibes/'}),  # April 1st 2015
-    (r'^accounts/profile/$', 'django.views.generic.simple.redirect_to', {'url': 'http://www.scenemusic.net/demovibes/'}),
+    (r'^accounts/profile/$', 'django.views.generic.simple.redirect_to', {'url': '/demovibes/'}),
     (r'^accounts/logout/$', 'webview.views.log_out'),
     (r'^demovibes/', include('demovibes.webview.urls')),
     (r'^openid/', include('demovibes.openid_provider.urls')),
     (r'^search/', include('demovibes.search.urls')),
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
-    (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    #(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
@@ -25,9 +25,9 @@ urlpatterns = patterns('',
     (r'^account/', include('django_authopenid.urls')),
     (r'^forum/', include('forum.urls')),
 
-    #Only use this under development!! Only for serving static files with dev server!
-    #(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
     (r'^about/(\w+)/$', about_pages),
 )
 if settings.DEBUG:
+    #Only use this under development!! Only for serving static files with dev server!
     urlpatterns += patterns('', (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}))
+
