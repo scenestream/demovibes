@@ -64,7 +64,6 @@ Author:
 {{ gettext("Uploaded By") }}: {{ display.user(object.uploader) }}
 {% endif %}
 
-<p>{{ gettext("Extra Resources") }}: {{ display.songicons(object) }} {{ display.links(object) }}</p>
 
 <p>
 {{ gettext("Song Length") }}: {{ object.length() }}<br />
@@ -113,14 +112,14 @@ Author:
 {{ gettext("It was added %(timesince)s ago.", timesince=object.added|timesince) }}
 </p>
 
-{% if object.get_metadata().pouetid %}
-  {{ object.get_pouet_screenshot() }}
+<p>{{ gettext("Extra Resources") }}: {{ display.songicons(object) }} {{ display.links(object) }}</p>
+{# {% if object.get_metadata().pouetid %}
   {{ object.get_pouet_download() }}
-{% endif %}
-{% if object.get_metadata().screenshot %}
+{% endif %} #}
+{# {% if object.get_metadata().screenshot %}
   <h2><img class="icon_header" src="{{ STATIC_URL }}icon_screenshot.png" alt="" />{{ gettext("Screenshot") }}</h2>
   <a href="{{ url ("dv-screenshot", object.get_metadata().screenshot.id) }}">{% if object.get_metadata().screenshot.thumbnail %}<img src="{{ object.get_metadata().screenshot.thumbnail.url }}" alt="{{ object.get_metadata().screenshot.name|e }}" />{% else %}(No thumbnail{% endif %}</a>
-{% endif %}
+{% endif %} #}
 
 {% if object.songdownload_set.all()  %}
  <h2><img class="icon_header" src="{{ STATIC_URL }}link_go.png" alt="" />{{ gettext("Download Links") }}</h2>
@@ -170,9 +169,11 @@ Author:
     {% for ss in object.get_screenshots() %}
         {{ display.screenshot(ss.image) }}
     {% endfor %}
+{% else %}
+    <p>No screenshots</p>
 {% endif %}
 <div class="clear"></div>
-<a href="{{ url('dv-add_screenshot', object.id) }}">Add new screenshot</a>
+<p><a href="{{ url('dv-add_screenshot', object.id) }}">Add new screenshot</a></p>
 
 <h2><img class="icon_header" src="{{ STATIC_URL }}link_edit.png" alt="" />{{ gettext("Song Corrections &amp; Updates") }}</h2>
 <p><a href="{{ url ("dv-song-edit", object.id) }}">[{{ gettext("Edit Information") }}]</a> - <a href="{{ url ("dv-song-addlink", object.id) }}">[{{ gettext("Add Links") }}]</a>
