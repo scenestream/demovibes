@@ -154,7 +154,7 @@ def find_queue_time_limit(user, song):
 def queue_song(song, user, event = True, force = False):
     event_metadata = {'song': song.id, 'user': user.id}
 
-    if not force and user.get_profile().is_hellbanned():
+    if user.get_profile().is_hellbanned():
         return False
 
     if SELFQUEUE_DISABLED and song.is_connected_to(user):
@@ -178,7 +178,6 @@ def queue_song(song, user, event = True, force = False):
     time_left_delta = models.TimeDelta(seconds=time_left)
 
     if not force:
-
         if time_full:
             result = False
             models.send_notification("Song is too long. Remaining timeslot : %s. Next timeslot change: <span class='tzinfo'>%s</span>" %
