@@ -7,6 +7,7 @@ google*.html
 demovibes/urls.pickle
 demovibes/registration/captcha_data.py
 demovibes/secretsmileys.py
+secretsmileys.*
 
 templates/local/*
 templates/jinja/local/*
