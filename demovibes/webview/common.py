@@ -169,7 +169,7 @@ def queue_song(song, user, event = True, force = False):
         hour = random.randrange(0, 24)
         if hour not in hours:
             hours.append(hour)
-    if today in hours:
+    if today.hour in hours:
         models.send_notification("You can't request songs during this hour!", user)
         return False
 
