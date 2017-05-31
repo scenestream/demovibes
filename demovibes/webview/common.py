@@ -171,8 +171,24 @@ def queue_song(song, user, event = True, force = False):
     time = song.create_lock_time()
     result = True
 
-    if models.Queue.objects.filter(played=False).count() < MIN_QUEUE_SONGS_LIMIT and not song.is_locked():
-        force = True
+    total_req_count = models.Queue.objects.filter(played=False).count()
+    if total_req_count < MIN_QUEUE_SONGS_LIMIT and not song.is_locked():
+        Q = models.Queue.objects.filter(played=False, requested_by=user)
+        user_req_and_play_count = Q.count()
+        total_req_and_play_count = total_req_count
+
+        now_playing = get_now_playing_song()
+        if now_playing:
+            total_req_and_play_count += 1
+            if now_playing.requested_by == user:
+                user_req_and_play_count += 1
+
+        # Is user the only one requesting (and also same user as requester of
+        # currently playing song) ? Then allow forced queueing.
+        # In all other cases there's at least one other requester and
+        # then the normal rules apply.
+        if user_req_and_play_count == total_req_and_play_count:
+            force = True
 
     time_full, time_left, time_next = find_queue_time_limit(user, song)
     time_left_delta = models.TimeDelta(seconds=time_left)
@@ -184,7 +200,8 @@ def queue_song(song, user, event = True, force = False):
                         (time_left_delta.to_string(), time_next.strftime("%H:%M")), user)
 
         requests = cache.get(key, None)
-        Q = models.Queue.objects.filter(played=False, requested_by = user)
+        if not Q:
+            Q = models.Queue.objects.filter(played=False, requested_by=user)
         if requests == None:
             requests = Q.count()
         else:
