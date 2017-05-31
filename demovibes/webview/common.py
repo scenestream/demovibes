@@ -170,7 +170,7 @@ def queue_song(song, user, event = True, force = False):
         if hour not in hours:
             hours.append(hour)
     if today.hour in hours:
-        models.send_notification("You can't request songs during this hour!", user)
+        models.send_notification("Request disabled this hour. DJ Random has the floor!!!", user)
         return False
 
     #To update lock time and other stats
