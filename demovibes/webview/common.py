@@ -16,6 +16,7 @@ from django.utils.html import escape
 import logging
 import socket
 import datetime
+import random
 import j2shim
 import time
 
@@ -159,6 +160,17 @@ def queue_song(song, user, event = True, force = False):
 
     if SELFQUEUE_DISABLED and song.is_connected_to(user):
         models.send_notification("You can't request your own songs!", user)
+        return False
+
+    today = datetime.datetime.today()
+    random.seed(today.year+today.month+today.day)
+    hours = []
+    while len(hours)<3:
+        hour = random.randrange(0, 24)
+        if hour not in hours:
+            hours.append(hour)
+    if today in hours:
+        models.send_notification("You can't request songs during this hour!", user)
         return False
 
     #To update lock time and other stats
