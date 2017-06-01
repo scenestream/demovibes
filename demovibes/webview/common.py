@@ -153,11 +153,11 @@ def find_queue_time_limit(user, song):
 
 
 def get_dj_hours(date, num_hours):
-    random.seed(date.year+date.month+date.day)
+    rnd = random.Random(date.year+date.month+date.day)
     hours = []
     num_hours = min(num_hours, 24)
     while len(hours) < num_hours:
-        hour = random.randrange(0, 24)
+        hour = rnd.randrange(0, 24)
         if hour not in hours:
             hours.append(hour)
 
