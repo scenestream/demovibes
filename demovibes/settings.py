@@ -334,6 +334,9 @@ JINJA2_TEMPLATE_DIRS = (
 
 JINJA2_EXTENSIONS = ["jinja2.ext.i18n"]
 
+# Number of DJ hours per day (default is 0)
+# DJ_HOURS = 3
+
 # The minimum number of songs in queue before limits are considered
 #MIN_QUEUE_SONGS_LIMIT = 1
 

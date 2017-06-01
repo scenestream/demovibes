@@ -152,10 +152,11 @@ def find_queue_time_limit(user, song):
     return (False, False, next)
 
 
-def get_dj_hours(date):
+def get_dj_hours(date, num_hours):
     random.seed(date.year+date.month+date.day)
     hours = []
-    while len(hours) < 3:
+    num_hours = min(num_hours, 24)
+    while len(hours) < num_hours:
         hour = random.randrange(0, 24)
         if hour not in hours:
             hours.append(hour)
@@ -176,17 +177,19 @@ def queue_song(song, user, event = True, force = False):
     #To update lock time and other stats
     song = models.Song.objects.get(id=song.id)
 
-    if not force:
+    num_dj_hours = getattr(settings, 'DJ_HOURS', 0)
+
+    if not force and num_dj_hours:
         # Don't allow requests to be played during DJ hours
 
         play_start = models.Queue(song=song).get_eta()
-        hours_at_start = get_dj_hours(play_start)
+        hours_at_start = get_dj_hours(play_start, num_dj_hours)
 
         play_end = play_start + datetime.timedelta(seconds=song.get_songlength())
         if play_end.day == play_start.day:
             hours_at_end = hours_at_start
         else:
-            hours_at_end = get_dj_hours(play_end)
+            hours_at_end = get_dj_hours(play_end, num_dj_hours)
 
         if play_start.hour in hours_at_start or play_end.hour in hours_at_end:
             if datetime.datetime.now().hour in hours_at_start:
