@@ -193,9 +193,9 @@ def queue_song(song, user, event = True, force = False):
 
         if play_start.hour in hours_at_start or play_end.hour in hours_at_end:
             if datetime.datetime.now().hour in hours_at_start:
-                s = "Playing request during this hour is not allowed. DJ Random has the floor!!!"
+                s = "Queuing songs is disabled during DJ Random sessions. DJ Random has the floor!!!"
             else:
-                s = "Playing request during hour of expected play time is not allowed. DJ Random will have the floor!!!"
+                s = "Queuing songs during hour of expected play time is not allowed. DJ Random will have the floor!!!"
             models.send_notification(s, user)
             return False
 
