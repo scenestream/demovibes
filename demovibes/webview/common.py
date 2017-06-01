@@ -151,6 +151,18 @@ def find_queue_time_limit(user, song):
         return (False, total_seconds, next)
     return (False, False, next)
 
+
+def get_dj_hours(date, num_hours):
+    rnd = random.Random(date.year+date.month+date.day)
+    hours = []
+    num_hours = min(num_hours, 24)
+    while len(hours) < num_hours:
+        hour = rnd.randrange(0, 24)
+        if hour not in hours:
+            hours.append(hour)
+
+    return hours
+
 @atomic("queue-song")
 def queue_song(song, user, event = True, force = False):
     event_metadata = {'song': song.id, 'user': user.id}
@@ -162,19 +174,30 @@ def queue_song(song, user, event = True, force = False):
         models.send_notification("You can't request your own songs!", user)
         return False
 
-    today = datetime.datetime.today()
-    random.seed(today.year+today.month+today.day)
-    hours = []
-    while len(hours)<3:
-        hour = random.randrange(0, 24)
-        if hour not in hours:
-            hours.append(hour)
-    if today.hour in hours:
-        models.send_notification("Request disabled this hour. DJ Random has the floor!!!", user)
-        return False
-
     #To update lock time and other stats
     song = models.Song.objects.get(id=song.id)
+
+    num_dj_hours = getattr(settings, 'DJ_HOURS', 0)
+
+    if not force and num_dj_hours:
+        # Don't allow requests to be played during DJ hours
+
+        play_start = models.Queue(song=song).get_eta()
+        hours_at_start = get_dj_hours(play_start, num_dj_hours)
+
+        play_end = play_start + datetime.timedelta(seconds=song.get_songlength())
+        if play_end.day == play_start.day:
+            hours_at_end = hours_at_start
+        else:
+            hours_at_end = get_dj_hours(play_end, num_dj_hours)
+
+        if play_start.hour in hours_at_start or play_end.hour in hours_at_end:
+            if datetime.datetime.now().hour in hours_at_start:
+                s = "Playing request during this hour is not allowed. DJ Random has the floor!!!"
+            else:
+                s = "Playing request during hour of expected play time is not allowed. DJ Random will have the floor!!!"
+            models.send_notification(s, user)
+            return False
 
     key = "songqueuenum-" + str(user.id)
 
