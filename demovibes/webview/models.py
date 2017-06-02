@@ -1113,7 +1113,13 @@ class Song(models.Model):
         return r
 
     def get_songlength(self):
-        return self.loopfade_time or self.song_length
+        if self.loopfade_time:
+            return self.loopfade_time
+
+        if self.song_length is None and self.set_song_data():
+            self.save()
+
+        return 0 if self.song_length is None else self.song_length
 
     def length(self):
         """
@@ -1683,13 +1689,8 @@ class Queue(models.Model):
                     pass
                 return self.playtime
         for q in baseq_lt.filter(playtime = None, priority = False):
-            if not q.song.song_length:
-                q.song.set_song_data()
-                q.song.save()
-            try:
-                playtime = playtime + q.song.get_songlength()
-            except:
-                pass
+            playtime = playtime + q.song.get_songlength()
+
         for q in baseq.filter(priority = True):
             playtime = playtime + q.song.get_songlength()
         eta = datetime.datetime.now() + datetime.timedelta(seconds=playtime)
