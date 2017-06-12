@@ -16,4 +16,4 @@ Contact & updates
 
 Latest version is avaliable at https://github.com/arabek/demovibes/
 
-This code is released as (GPL)[http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt]. May contain traces of NUTS!
+This code is released as [GPL](http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt). May contain traces of NUTS!
