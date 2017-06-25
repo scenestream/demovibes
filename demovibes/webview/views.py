@@ -846,7 +846,7 @@ def view_songinfo(request, songinfo_id):
     if request.method == "POST":
         if request.POST.has_key("activate") and request.POST["activate"]:
             if not meta.checked:
-                meta.user.get_profile().send_message(
+                meta.user.get_profile().send_message_not_to_self(
                     subject="Song info approved",
                     message="Your metadata for song [song]%s[/song] is now active :)"  % meta.song.id,
                     sender = request.user
@@ -855,7 +855,7 @@ def view_songinfo(request, songinfo_id):
             meta.set_active()
         if request.POST.has_key("deactivate") and request.POST["deactivate"]:
             if not meta.checked:
-                meta.user.get_profile().send_message(
+                meta.user.get_profile().send_message_not_to_self(
                     subject="Song info not approved",
                     message="Your metadata for song [song]%s[/song] was not approved :(" % meta.song.id,
                     sender = request.user
@@ -1027,7 +1027,7 @@ def activate_upload(request):
                     escape(song.title),
                 ), None, 2)
         if song.uploader.get_profile().pm_accepted_upload and status == 'A' or status == 'R':
-            song.uploader.get_profile().send_message(
+            song.uploader.get_profile().send_message_not_to_self(
                 sender = request.user,
                 message = mail_tpl.render(c),
                 subject = "Song Upload Status Changed To: %s" % stat
@@ -1303,7 +1303,8 @@ def activate_artists(request):
         # Send the email to inform the user of their request status
 
         if artist.created_by.get_profile().email_on_artist_add and status == 'A' or status == 'R':
-            artist.created_by.get_profile().send_message(sender = request.user,
+            artist.created_by.get_profile().send_message_not_to_self(
+                sender = request.user,
                 message = mail_tpl.render(c),
                 subject = u"Artist %s : %s" % (artist.handle, stat)
             )
@@ -1373,7 +1374,7 @@ def activate_groups(request):
 
         # Send the email to inform the user of their request status
         if group.created_by.get_profile().email_on_group_add and status == 'A' or status == 'R':
-            group.created_by.get_profile().send_message(
+            group.created_by.get_profile().send_message_not_to_self(
                 sender = request.user,
                 message = mail_tpl.render(c),
                 subject = "Group Request Status Changed To: %s" % stat
@@ -1410,7 +1411,7 @@ def activate_compilations(request):
 
         # Send the email to inform the user of their request status
         if compilation.created_by.get_profile().email_on_group_add and status == 'A' or status == 'R':
-            compilation.created_by.get_profile().send_message(
+            compilation.created_by.get_profile().send_message_not_to_self(
                 sender = request.user,
                 message = mail_tpl.render(c),
                 subject = "Compilation Request Status Changed To: %s" % stat
@@ -1481,7 +1482,7 @@ def activate_labels(request):
 
         # Send the email to inform the user of their request status
         if this_label.created_by.get_profile().email_on_group_add and status == 'A' or status == 'R':
-            this_label.created_by.get_profile().send_message(
+            this_label.created_by.get_profile().send_message_not_to_self(
                 sender = request.user,
                 message = mail_tpl.render(c),
                 subject = "Label Request Status Changed To: %s" % stat
@@ -1590,7 +1591,7 @@ def activate_screenshots(request):
 
         # Send the email to inform the user of their request status
         if this_screenshot.added_by.get_profile().email_on_group_add and status == 'A' or status == 'R':
-            this_screenshot.added_by.get_profile().send_message(
+            this_screenshot.added_by.get_profile().send_message_not_to_self(
                 sender = request.user,
                 message = mail_tpl.render(c),
                 subject = "Screenshot Request Status Changed To: %s" % stat
