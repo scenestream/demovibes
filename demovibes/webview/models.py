@@ -505,12 +505,24 @@ class Userprofile(models.Model):
         stat, image = self.get_status()
         return stat
 
-    def send_message(self, subject, message, sender, reply_to=False):
+    def do_send_message(self, subject, message, sender,
+                        reply_to, allow_to_self=True):
+
+        if not allow_to_self and sender == self.user:
+            return
+
         PrivateMessage.objects.create(sender = sender,
             to = self.user,
             message = message,
             subject = subject
         )
+
+    def send_message(self, subject, message, sender, reply_to=False):
+        self.do_send_message(subject, message, sender, reply_to)
+
+    def send_message_not_to_self(self, subject, message, sender,
+                                 reply_to=False):
+        self.do_send_message(subject, message, sender, reply_to, False)
 
     def get_status(self):
         """
