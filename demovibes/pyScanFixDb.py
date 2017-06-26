@@ -96,6 +96,7 @@ for song in songs:
             song.status = options.status
             song.save()
     if F and os.path.isfile(song.file.path):
+        song.status = "A"
         r = song.set_song_data()
         
         if not r:

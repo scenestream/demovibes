@@ -54,6 +54,9 @@ class ScanFile(object):
             samplerate = re.compile(r'samplerate:(\d*\.?\d+)')
             loopiness = re.compile(r'loopiness:(\d*\.?\d+)')
 
+            repgain = re.compile(r'replaygain:(-?\d*\.?\d+)')
+            self.__replaygain = float(repgain.search(output).group(1))
+
             self.length = float(length.search(output).group(1))
 
             samplerate_match = samplerate.search(output)
@@ -81,7 +84,7 @@ class ScanFile(object):
         if not self.__replaygain:
             try:
                 path = os.path.dirname(program)
-                p = subprocess.Popen([program, self.file], stdout = subprocess.PIPE, cwd = path)
+                p = subprocess.Popen([program, '-r', "self.file"], stdout = subprocess.PIPE, cwd = path)
                 output = p.communicate()[0]
                 repgain = re.compile(r'replaygain:(-?\d*\.?\d+)')
                 self.__replaygain = float(repgain.search(output).group(1))
