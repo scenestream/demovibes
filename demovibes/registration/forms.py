@@ -32,7 +32,7 @@ class RegistrationForm(forms.Form):
     ``RegistrationProfile.objects.create_inactive_user()``.
 
     """
-    username = forms.RegexField(regex=r'^\w+$',
+    username = forms.RegexField(regex=r'^[\w\-]+$',
                                 max_length=30,
                                 widget=forms.TextInput(attrs=attrs_dict),
                                 label=_(u'username'))
