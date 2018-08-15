@@ -54,12 +54,12 @@ class SongMetaAdmin(admin.ModelAdmin):
     exclude = ["active"]
 
 class SongAdmin(admin.ModelAdmin):
-    list_display = ['title', 'status', 'artist', 'uploader', 'bitrate', 'added', 'explicit']
-    list_editable = ['status']
+    list_display = ['title', 'status', 'artist', 'uploader', 'bitrate', 'added', 'explicit', 'legacy_flag']
+    list_editable = ['status', 'legacy_flag']
     search_fields = ['title', 'status']
     list_filter = ['status']
     fieldsets = [
-        ("General"        ,{ 'fields' : ['title', 'file', 'explicit', 'status', 'license']}),
+        ("General"        ,{ 'fields' : ['title', 'file', 'explicit', 'status', 'legacy_flag', 'license']}),
         ("Technical Stuff"    ,{ 'fields' : ['song_length', 'bitrate','samplerate','replay_gain']}),
         ("Playback"    ,{ 'fields' : ['loopfade_time', "playback_fadeout", "playback_bass_mode", "playback_bass_inter", "playback_bass_ramp", "playback_bass_mix",]}),
     ]

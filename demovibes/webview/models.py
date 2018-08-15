@@ -972,6 +972,11 @@ class Song(models.Model):
             ('R', 'Rejected'),
             ('K', 'Kaput') # file doesn't exist or scanner didn't like the song
         )
+    LEGACY_FLAG = (
+            (None, 'N/A'), # Is not a legacy tune (new upload since Jul. 2018, or replaced streamrip)
+            ('R', 'Recovered'), # is a recovered stream rip (not original, needs replacement)
+            ('M', 'Missing'), # existed in Old Necta but is present now
+        )
     added = models.DateTimeField(auto_now_add=True)
     bitrate = models.IntegerField(blank = True, null = True)
     explicit = models.BooleanField(default=False, verbose_name = "Explicit Lyrics?", help_text="Place a checkmark in the box to flag this song as having explicit lyrics/content")
@@ -997,6 +1002,7 @@ class Song(models.Model):
     song_length = models.IntegerField(blank = True, null = True)
     startswith = models.CharField(max_length=1, editable = False, db_index = True)
     status = models.CharField(max_length = 1, choices = STATUS_CHOICES, default = 'A', db_index=True)
+    legacy_flag = models.CharField(max_length = 1, choices = LEGACY_FLAG, default = None, db_index=True)
     times_played = models.IntegerField(null = True, default = 0)
     title = models.CharField(verbose_name="* Song Name", help_text="The name of this song, as it should appear in the database", max_length=80, db_index = True)
     uploader = models.ForeignKey(User,  null = True, blank = True)
@@ -1092,7 +1098,7 @@ class Song(models.Model):
         """
         Check if song is considered active.
         """
-        return self.status == "A" or self.status == "N"
+        return (self.status == "A" or self.status == "N") and self.legacy_flag != "M"
 
     class Meta:
         ordering = ['title']

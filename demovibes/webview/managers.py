@@ -72,4 +72,4 @@ class ActiveSongManager(models.Manager):
     Bound to Song.active
     """
     def get_query_set(self):
-        return super(ActiveSongManager, self).get_query_set().filter(status = 'A')
+        return super(ActiveSongManager, self).get_query_set().filter(status = 'A').exclude(legacy_flag = 'M')

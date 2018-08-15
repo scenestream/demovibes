@@ -48,6 +48,7 @@ Extra Resources:
 Song Length: {{ object.length }}<br />
 {% if object.release_year %}Release Year: {{ object.release_year }}<br />{% endif %}
 Song Status: {{ object.get_status_display }}
+{% if object.legacy_flag %}<br />Song Legacy Flag: {{ object.legacy_flag }}{% endif %}
 {% if object.bitrate %}<br />Song Bitrate: {{ object.bitrate }} kbps{% endif %}
 {% if object.type %}<br />Song Source: {{ object.type }}{% endif %}
 {% if object.platform %}<br />Song Platform: {% with object.platform as P %}{% include "webview/t/platformname.html" %}{% endwith %}{% endif %}

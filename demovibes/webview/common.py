@@ -113,7 +113,10 @@ def ratelimit(limit=10,length=86400):
     return decorator
 
 def play_queued(queue_item):
-    queue_item.song.times_played = queue_item.song.times_played + 1
+    try:
+        queue_item.song.times_played = queue_item.song.times_played + 1
+    except TypeError:
+        queue_item.song.times_played = 1
     queue_item.song.save()
     queue_item.time_played=datetime.datetime.now()
     queue_item.played = True
