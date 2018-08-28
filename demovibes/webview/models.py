@@ -973,7 +973,7 @@ class Song(models.Model):
             ('K', 'Kaput') # file doesn't exist or scanner didn't like the song
         )
     LEGACY_FLAG = (
-            (None, 'N/A'), # Is not a legacy tune (new upload since Jul. 2018, or replaced streamrip)
+            (' ', 'N/A'), # Is not a legacy tune (new upload since Jul. 2018, or replaced streamrip)
             ('R', 'Recovered'), # is a recovered stream rip (not original, needs replacement)
             ('M', 'Missing'), # existed in Old Necta but is present now
         )
@@ -1002,7 +1002,7 @@ class Song(models.Model):
     song_length = models.IntegerField(blank = True, null = True)
     startswith = models.CharField(max_length=1, editable = False, db_index = True)
     status = models.CharField(max_length = 1, choices = STATUS_CHOICES, default = 'A', db_index=True)
-    legacy_flag = models.CharField(max_length = 1, choices = LEGACY_FLAG, default = None, db_index=True)
+    legacy_flag = models.CharField(max_length = 1, choices = LEGACY_FLAG, default = ' ', db_index=True)
     times_played = models.IntegerField(null = True, default = 0)
     title = models.CharField(verbose_name="* Song Name", help_text="The name of this song, as it should appear in the database", max_length=80, db_index = True)
     uploader = models.ForeignKey(User,  null = True, blank = True)
