@@ -166,6 +166,8 @@ def get_dj_hours(date, num_hours):
 
     return hours
 
+# This atomic decoration is great and all, but it doesn't
+#  work when you actually catch and handle all exceptions.
 @atomic("queue-song")
 def queue_song(song, user, event = True, force = False):
     event_metadata = {'song': song.id, 'user': user.id}
@@ -177,8 +179,10 @@ def queue_song(song, user, event = True, force = False):
         models.send_notification("You can't request your own songs!", user)
         return False
 
-    #To update lock time and other stats
-    song = models.Song.objects.get(id=song.id)
+    # To update lock time and other stats
+    #  select_for_update is used to lock the song row, so no other request
+    #  can modify it at the same time.
+    song = models.Song.objects.select_for_update().get(id=song.id)
 
     num_dj_hours = getattr(settings, 'DJ_HOURS', 0)
 
