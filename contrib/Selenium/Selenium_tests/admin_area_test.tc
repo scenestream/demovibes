@@ -109,12 +109,12 @@
 <tr>
 	<td>type</td>
 	<td>id=id_link</td>
-	<td>http://www.youtube.com/user/terrasque</td>
+	<td>https://www.youtube.com/user/terrasque</td>
 </tr>
 <tr>
 	<td>type</td>
 	<td>id=id_link</td>
-	<td>http://www.youtube.com/user/%linkval%</td>
+	<td>https://www.youtube.com/user/%linkval%</td>
 </tr>
 <tr>
 	<td>type</td>
