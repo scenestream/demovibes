@@ -9,11 +9,11 @@ Installation & Streaming
 See our vagrant files to understand the deployment process.
 The vagrant files are available at:
 
-https://github.com/arabek/vagrant-demovibes/
+https://github.com/penamety/vagrant-demovibes
 
 Contact & updates
 =================
 
-Latest version is avaliable at https://github.com/arabek/demovibes/
+Latest version is avaliable at https://github.com/demovibes/demovibes/
 
 This code is released as [GPL](http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt). May contain traces of NUTS!
