@@ -715,8 +715,8 @@ hr {
 /* I only changed the color, but I pulled all the styles in here. It's harder to override inline styles */
 .onelinerpre span:last-child {
 	/* float: right !important; */
-	margin: 0 !important;
-	text-align: right !important;
+/*	margin: 0 !important;
+	text-align: right !important; */
     color: #FC3 !important;
     font-size: 7pt;
 }
