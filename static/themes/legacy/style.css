@@ -703,6 +703,13 @@ hr {
 	margin-bottom: .5em;
 }
 
+/* fix code tags in bbcode */
+.bbcode {
+    font-family: monospace;
+    background: gainsboro;
+    display: inline-block;
+}
+
 /* Textarea for creating PMs. See previous */
 #id_message {
 	width: 99%;
