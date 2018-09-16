@@ -43,7 +43,7 @@ class ScanFile(object):
 
             self.file = os.path.normpath(file.encode(fsenc))
             path = os.path.dirname(program)
-            p = subprocess.Popen([program, self.file], stdout = subprocess.PIPE, cwd = path)
+            p = subprocess.Popen([program, '-r', self.file], stdout = subprocess.PIPE, cwd = path)
             output = p.communicate()[0]
             if p.returncode != 0:
                 L.warn("scan doesn't like %s" % self.file)
@@ -55,9 +55,7 @@ class ScanFile(object):
             loopiness = re.compile(r'loopiness:(\d*\.?\d+)')
 
             repgain = re.compile(r'replaygain:(-?\d*\.?\d+)')
-            # dscan does not do -r replaygain any more, simply return 0.0
-            #self.__replaygain = float(repgain.search(output).group(1))
-            self.__replaygain = float(0)
+            self.__replaygain = float(repgain.search(output).group(1))
 
             self.length = float(length.search(output).group(1))
 
@@ -80,9 +78,6 @@ class ScanFile(object):
             L.error("Error occurred. Printing traceback.\n%s" % trace)
 
     def replaygain(self):
-        # dscan does not do -r replaygain any more, simply return 0.0
-        return float(0)
-
         if not self.readable:
             return 0
 

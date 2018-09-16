@@ -1,4 +1,0 @@
-[submodule "demosauce"]
-	path = demosauce
-	url = https://gitlab.com/maep/demosauce.git
-	branch = master
