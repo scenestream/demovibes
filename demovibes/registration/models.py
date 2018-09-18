@@ -52,8 +52,9 @@ class RegistrationManager(models.Manager):
                 return False
             if not profile.activation_key_expired():
                 user = profile.user
-                #user.is_active = True
-                #user.save()
+                if settings.ALLOW_USER_SELF_ACTIVATE:
+                    user.is_active = True
+                    user.save()
                 profile.activation_key = "ALREADY_ACTIVATED"
                 profile.save()
                 return user

@@ -94,7 +94,13 @@ LANGUAGE_CODE = 'en-us'
 
 SITE_ID = 1
 
+# Account activation details
+#  Number of days that an activation link is valid
 ACCOUNT_ACTIVATION_DAYS = 7
+# Allow a user to self-activate by clicking email link
+#  Note that if this is disabled, admins must manually approve all new users
+ALLOW_USER_SELF_ACTIVATE = 0
+
 ## List of domains to not accept email registration from
 #BAD_EMAIL_DOMAINS = []
 
