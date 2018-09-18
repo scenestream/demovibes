@@ -2,6 +2,14 @@ from demovibes.webview.models import *
 from django.contrib import admin
 from django.contrib.contenttypes import generic
 
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+
+UserAdmin.list_display = ('id', 'username', 'email', 'is_active', 'date_joined');
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
 class LogoAdmin(admin.ModelAdmin):
 	search_fields = ["creator", "description"]
 	list_display = ["id", "creator"]
