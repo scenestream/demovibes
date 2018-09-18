@@ -131,6 +131,8 @@ NOTIFY_NEW_SONG_COMMENT = False
 # Host for sending e-mail. This would be the SMTP host for your email provider
 #EMAIL_HOST = ''
 #DEFAULT_FROM_EMAIL = ""
+# address to send admin-type emails to
+#ADMIN_EMAIL = ""
 
 # Port for sending e-mail. By default, it is almost always 25.
 #EMAIL_PORT = 25

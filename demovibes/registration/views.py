@@ -136,7 +136,7 @@ def activate(request, activation_key,
 
     if email_admin > 0:
         try:
-            mail_to = settings.DEFAULT_FROM_EMAIL
+            mail_to = settings.ADMIN_EMAIL
             mail_tpl = loader.get_template('registration/t/new_registrant.txt')
             site = Site.objects.get_current()
 
