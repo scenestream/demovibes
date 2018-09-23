@@ -3,7 +3,13 @@
 {% block main %}
 <h2><img class="icon_header" src="{{ MEDIA_URL }}tick.png" alt="" />Accounts to activate</h2>
 
-<table>
+<table border=1>
+<tr>
+	<th>Username</th>
+	<th>Email</th>
+	<th>Date Joined</th>
+	<th>Approve / Reject</th>
+</tr>
 {% for p in accounts %}
 <tr>
     <td>{{ p.user.username }}</td>
