@@ -8,7 +8,7 @@
 <br />
 {% for stream in object_list %}
 <div class="bubbleInfo">
-    {{ dv.flag(stream.country_code) }} <a href="{{ stream.url|e }}" class="trigger">{{stream.name|e}}</a> ({{ stream.bitrate }} kbps {{ stream.get_streamtype_display() }})
+    {{ dv.flag(stream.country_code) }} <a href="{{ stream.url|e }}">{{stream.name|e}}</a> ({{ stream.bitrate }} kbps {{ stream.get_streamtype_display() }}) <a class="trigger"><sup>[info]</sup></a>
 <div class="popup">
     <b>{{ gettext("Stream Name") }}:</b> {{ dv.flag(stream.country_code) }} {{stream.name|e}}<br />
     <b>{{ gettext("Direct Stream Link") }}:</b> <a href="{{ stream.url|e }}">{{stream.name|e}}</a><br />
