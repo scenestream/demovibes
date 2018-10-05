@@ -96,6 +96,10 @@ div.taglist p:first-child { margin-top: 0; }
 
 #lic-info {float: right; width: 60%;}
 
+.compilation_screenshot, .group_logo, .artist_logo, .label_logo {
+    width: 100%;
+}
+
 div.screenshot {
     padding: 3px;
     text-align: center;
