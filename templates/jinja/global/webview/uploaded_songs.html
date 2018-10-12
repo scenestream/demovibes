@@ -37,13 +37,9 @@
  </td>
  <td>
 	 <!-- {% include "webview/t/flash_playsong.html" %} -->
-	 {% if song.get_download_url(user).endswith('.mp3') %}
 	 <audio controls>
-		 <source src="{{ song.get_download_url(user) }}"/>
+		 <source src="{{ MEDIA_ROOT }}media/music/previews/{{ song.id }}.mp3"/>
 	 </audio>
-	 {% else %}
-	 <a href="{{ song.get_download_url(user) }}">Download to listen</a>
-	 {% endif %}
  </td>
  <td>
   <a href="{{ url("dv-uploads") }}?song={{song.id}}&amp;status=R"><img src="{{ STATIC_URL }}thumb_down.png" title="Reject" alt="Reject" /></a>

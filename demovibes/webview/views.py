@@ -1034,6 +1034,8 @@ def activate_upload(request):
                 subject = "Song Upload Status Changed To: %s" % stat
             )
     songs = m.Song.objects.filter(status = "U").order_by('added')
+    for s in songs:
+        s.ensure_preview() # if no preview mp3 already exists, generate it
     return j2shim.r2r('webview/uploaded_songs.html', {'songs' : songs}, request=request)
 
 import find_spammers

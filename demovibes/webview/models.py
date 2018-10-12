@@ -1085,7 +1085,24 @@ class Song(models.Model):
         if self.downloadable_by(user):
            return protected_downloads.get_song_url(self, user)
         return False
-
+    def ensure_preview(self):
+        #  previews will be stored to a previews dir; we can use a cron job to peridically purge it
+        preview_dir = getattr(settings, 'MEDIA_ROOT', False) + "media/music/previews/"
+        wav_path = preview_dir + str(self.id) + ".wav"
+        mp3_path = preview_dir + str(self.id) + ".mp3"
+        # check if the preview already exists
+        if os.path.isfile(mp3_path):
+          return
+        # otherwise use dscan and lame to create one
+        dscan = getattr(settings, 'DEMOSAUCE_SCAN', False)
+        lame = getattr(settings, 'LAME', "/usr/bin/lame")
+        ret = call([dscan, "-o", wav_path, self.file.path])
+        if ret != 0:
+            log.debug("Could not dscan %s to %s: %s" % (self.file, wav_path, "some reason"))
+        ret = call([lame, "-r", "-s", "16", "-m", "-j", wav_path, mp3_path])
+        if ret != 0:
+            log.debug("Could not lame %s to %s: %s" % (wav_path, mp3_path, "some reason"))
+        log.debug("Created preview for %s at %s." % (self.file.path, mp3_path))
     def has_video(self):
         return self.get_metadata().ytvidid
 
