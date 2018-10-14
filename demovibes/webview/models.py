@@ -6,6 +6,7 @@ import datetime
 
 import re
 import os.path
+import subprocess
 from django.utils import simplejson
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -1086,23 +1087,42 @@ class Song(models.Model):
            return protected_downloads.get_song_url(self, user)
         return False
     def ensure_preview(self):
+        filename, file_ext = os.path.splitext(self.file.path)
         #  previews will be stored to a previews dir; we can use a cron job to peridically purge it
         preview_dir = getattr(settings, 'MEDIA_ROOT', False) + "media/music/previews/"
         wav_path = preview_dir + str(self.id) + ".wav"
         mp3_path = preview_dir + str(self.id) + ".mp3"
-        # check if the preview already exists
-        if os.path.isfile(mp3_path):
+        flag_path = preview_dir + str(self.id) + ".enc"
+        # check if the preview already exists, or is in progress
+        if os.path.isfile(mp3_path) or os.path.isfile(flag_path):
           return
+        # if the file is already an mp3, make a symlink instead
+        if file_ext == '.mp3':
+            os.symlink(self.file.path, preview_dir + str(self.id) + ".mp3")
+            return
         # otherwise use dscan and lame to create one
+        # first create a 'flag' file that says encoding is in progress
+        # the view checks for this to avoid launching multiple encoding threads for the same file
+        open(flag_path, 'a').close()
         dscan = getattr(settings, 'DEMOSAUCE_SCAN', False)
         lame = getattr(settings, 'LAME', "/usr/bin/lame")
-        ret = call([dscan, "-o", wav_path, self.file.path])
+        ret = subprocess.call([dscan, "-o", wav_path, self.file.path])
         if ret != 0:
             log.debug("Could not dscan %s to %s: %s" % (self.file, wav_path, "some reason"))
-        ret = call([lame, "-r", "-s", "16", "-m", "-j", wav_path, mp3_path])
+            return
+        ret = subprocess.call([lame, "-S", wav_path, mp3_path])
         if ret != 0:
             log.debug("Could not lame %s to %s: %s" % (wav_path, mp3_path, "some reason"))
+            return
+        os.unlink(wav_path)
+        os.unlink(flag_path)
         log.debug("Created preview for %s at %s." % (self.file.path, mp3_path))
+    def has_preview(self):
+        # This is a hack so that the templates can avoid showing a dead player if the preview hasn't been generated yet
+        preview_dir = getattr(settings, 'MEDIA_ROOT', False) + "media/music/previews/"
+        if os.path.isfile(preview_dir + str(self.id) + ".mp3"):
+            return True
+        return False
     def has_video(self):
         return self.get_metadata().ytvidid
 

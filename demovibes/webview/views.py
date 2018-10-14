@@ -35,6 +35,7 @@ import hashlib
 import re
 import random
 import urllib2
+import thread
 # Create your views here.
 
 L = logging.getLogger('dv.webview.views')
@@ -162,6 +163,7 @@ class PlaySong(SongView):
         return self.song.downloadable_by(self.request.user)
 
     def set_context(self):
+        thread.start_new_thread(self.song.ensure_preview, ()) # this may be the wrong place, but not sure where to put it
         limit, total = m.protected_downloads.get_current_download_limits_for(self.request.user)
         self.song.log(self.request.user, "Song preview / download")
         return {'song': self.song, 'limit': limit, 'total': total}
@@ -974,7 +976,8 @@ def upload_song(request, artist_id):
                     # Should throw when the song isn't found in the DB
                     Q = m.SongApprovals(song = new_song, approved_by=request.user, uploaded_by=request.user)
                     Q.save()
-
+            else: # unapproved song; generate preview
+                thread.start_new_thread(new_song.ensure_preview, ())
             return HttpResponseRedirect(new_song.get_absolute_url())
     else:
         form = f.UploadForm()
@@ -1034,8 +1037,6 @@ def activate_upload(request):
                 subject = "Song Upload Status Changed To: %s" % stat
             )
     songs = m.Song.objects.filter(status = "U").order_by('added')
-    for s in songs:
-        s.ensure_preview() # if no preview mp3 already exists, generate it
     return j2shim.r2r('webview/uploaded_songs.html', {'songs' : songs}, request=request)
 
 import find_spammers
