@@ -7,6 +7,7 @@ from openid_provider.models import TrustedRoot
 from mybaseview import MyBaseView
 
 from django.db import DatabaseError
+from django.db.models.fields import FieldDoesNotExist
 
 from tagging.models import TaggedItem
 import tagging.utils
@@ -1089,18 +1090,21 @@ def showRecentChanges(request):
 class songStatistics(WebView):
     template = "stat_songs.html"
 
+    def get_songs(self):
+        return m.Song.objects.filter(status='A')
+
     def list_favorites(self):
-        return m.Song.objects.order_by('-num_favorited')
+        return self.get_songs().order_by('-num_favorited')
 
     def list_voted(self):
-        return m.Song.objects.filter(rating_votes__gt = 9).order_by('-rating')
+        return self.get_songs().filter(rating_votes__gt=9).order_by('-rating')
 
     def list_leastvotes(self):
-        return m.Song.objects.filter(status="A").exclude(locked_until__gte=datetime.datetime.now()).order_by('rating_votes', '?')[:100]
+        return self.get_songs().exclude(locked_until__gte=datetime.datetime.now()).order_by('rating_votes', '?')[:100]
 
     def list_random(self):
         max_id = m.Song.objects.order_by('-id')[0].id
-        max_songs = m.Song.objects.filter(status="A").count()
+        max_songs = self.get_songs().count()
         num_songs = 100
         num_songs = num_songs < max_songs and num_songs or max_songs
         songlist = []
@@ -1114,17 +1118,17 @@ class songStatistics(WebView):
               r = random.randint(0, max_id+1)
             r_list.append(r)
           r_done.extend(r_list)
-          songlist.extend([s for s in m.Song.objects.filter(id__in=r_list, status="A")])
+          songlist.extend([s for s in self.get_songs().filter(id__in=r_list)])
         return songlist
 
     def list_mostvotes(self):
-        return m.Song.objects.order_by('-rating_votes')
+        return self.get_songs().order_by('-rating_votes')
 
     def list_queued2(self):
-        return m.Song.objects.filter(status="A").exclude(locked_until__gte=datetime.datetime.now()).order_by('times_played', 'locked_until')
+        return self.get_songs().exclude(locked_until__gte=datetime.datetime.now()).order_by('times_played', 'locked_until')
 
     def list_queued(self):
-        return m.Song.objects.filter(status="A").order_by('-times_played')
+        return self.get_songs().order_by('-times_played')
 
     def initialize(self):
         self.stats = {
