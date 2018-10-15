@@ -1,4 +1,5 @@
 from django.db import models, connection
+from django.db.models.fields import FieldDoesNotExist
 
 class LockingManager(models.Manager):
     """ Add lock/unlock functionality to manager.
@@ -69,13 +70,17 @@ class ActiveSongManager(models.Manager):
     """
     This manager only returns the songs marked as Active.
 
+    For sites using the legacy_flag, songs with status Needs Re-Encoding are
+    also considered (because stream rips are marked as such).
+
     Bound to Song.active
     """
     def get_query_set(self):
         from models import has_legacy_flag
 
-        songs = super(ActiveSongManager, self).get_query_set().filter(status = 'A')
+        songs = super(ActiveSongManager, self).get_query_set()
         if has_legacy_flag():
-            return songs.exclude(legacy_flag='M')
+            return ((songs.filter(status='A')
+                    | songs.filter(status='N')).exclude(legacy_flag='M'))
         else:
-            return songs
+            return songs.filter(status='A')

@@ -1091,7 +1091,18 @@ class songStatistics(WebView):
     template = "stat_songs.html"
 
     def get_songs(self):
-        return m.Song.objects.filter(status='A')
+        try:
+            # Only called to throw if legacy_flag field doesn't exist.
+            m.Song._meta.get_field('legacy_flag')
+
+            # For sites using the legacy_flag also include songs with
+            # status Needs Re-Encoding (recovered from stream rip) and
+            # status Kaput (missing song file).
+            return (m.Song.objects.filter(status='A')
+                    | m.Song.objects.filter(status='K')
+                    | m.Song.objects.filter(status='N'))
+        except FieldDoesNotExist:
+            return m.Song.objects.filter(status='A')
 
     def list_favorites(self):
         return self.get_songs().order_by('-num_favorited')
