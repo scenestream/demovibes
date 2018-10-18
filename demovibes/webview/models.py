@@ -955,6 +955,18 @@ def createSongPath(instance, filename):
     return "%s/shortname/%s" % (base, filename)
 
 
+def has_legacy_flag():
+    from django.db import connection
+    cursor = connection.cursor()
+    cursor.execute("""
+SELECT * FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = 'demovibes'
+    AND TABLE_NAME = 'webview_song'
+    AND COLUMN_NAME = 'legacy_flag'""")
+
+    return cursor.fetchone() is not None
+
+
 class Song(models.Model):
     STATUS_CHOICES = (
             ('A', 'Active'),
@@ -1002,7 +1014,8 @@ class Song(models.Model):
     song_length = models.IntegerField(blank = True, null = True)
     startswith = models.CharField(max_length=1, editable = False, db_index = True)
     status = models.CharField(max_length = 1, choices = STATUS_CHOICES, default = 'A', db_index=True)
-    legacy_flag = models.CharField(max_length = 1, choices = LEGACY_FLAG, default = ' ', db_index=True)
+    if has_legacy_flag():
+        legacy_flag = models.CharField(max_length = 1, choices = LEGACY_FLAG, default = ' ', db_index=True)
     times_played = models.IntegerField(null = True, default = 0)
     title = models.CharField(verbose_name="* Song Name", help_text="The name of this song, as it should appear in the database", max_length=80, db_index = True)
     uploader = models.ForeignKey(User,  null = True, blank = True)
@@ -1098,7 +1111,7 @@ class Song(models.Model):
         """
         Check if song is considered active.
         """
-        return (self.status == "A" or self.status == "N") and self.legacy_flag != "M"
+        return (self.status == "A" or self.status == "N") and (not has_legacy_flag() or self.legacy_flag != "M")
 
     class Meta:
         ordering = ['title']
