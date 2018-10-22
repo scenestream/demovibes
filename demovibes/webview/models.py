@@ -1111,7 +1111,7 @@ class Song(models.Model):
         """
         Check if song is considered active.
         """
-        return (self.status == "A" or self.status == "N") and (not has_legacy_flag() or self.legacy_flag != "M")
+        return (self.status == "A" or self.status == "N") and getattr(self, 'legacy_flag', None) != "M"
 
     class Meta:
         ordering = ['title']

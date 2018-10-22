@@ -76,10 +76,8 @@ class ActiveSongManager(models.Manager):
     Bound to Song.active
     """
     def get_query_set(self):
-        from models import has_legacy_flag
-
         songs = super(ActiveSongManager, self).get_query_set()
-        if has_legacy_flag():
+        if songs and hasattr(songs[0], 'legacy_flag'):
             return ((songs.filter(status='A')
                     | songs.filter(status='N')).exclude(legacy_flag='M'))
         else:
