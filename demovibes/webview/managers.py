@@ -1,5 +1,4 @@
 from django.db import models, connection
-from django.db.models.fields import FieldDoesNotExist
 
 class LockingManager(models.Manager):
     """ Add lock/unlock functionality to manager.
