@@ -1113,6 +1113,14 @@ class Song(models.Model):
         """
         return (self.status == "A" or self.status == "N") and getattr(self, 'legacy_flag', None) != "M"
 
+    @staticmethod
+    def status_requires_file(status, legacy_flag=None):
+        return status != 'K' and legacy_flag != 'M'
+
+    def requires_file(self):
+        return Song.status_requires_file(self.status, \
+                                         getattr(self, 'legacy_flag', None))
+
     class Meta:
         ordering = ['title']
 
@@ -1339,7 +1347,8 @@ class Song(models.Model):
                 pass
 
     def save(self, *args, **kwargs):
-        if not os.path.isfile(self.file.path.encode("utf8")):
+        if self.requires_file() \
+           and not os.path.isfile(self.file.path.encode("utf8")):
             self.song_length = None
             self.bitrate = None
             self.samplerate = None
