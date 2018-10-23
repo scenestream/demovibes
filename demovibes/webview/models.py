@@ -1111,11 +1111,15 @@ class Song(models.Model):
         """
         Check if song is considered active.
         """
-        return (self.status == "A" or self.status == "N") and self.file is not None
+        return Song.status_is_requestable(self.status) and self.file is not None
+
+    @staticmethod
+    def status_is_requestable(status, legacy_flag=None):
+        return status in ['A', 'N'] and legacy_flag != 'M'
 
     @staticmethod
     def status_requires_file(status, legacy_flag=None):
-        return (status in ['A', 'N'] and legacy_flag != 'M') or status == 'J'
+        return Song.status_is_requestable(status, legacy_flag) or status == 'J'
 
     class Meta:
         ordering = ['title']
