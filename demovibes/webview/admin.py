@@ -78,6 +78,32 @@ class SongAdmin(admin.ModelAdmin):
     inlines = [DownloadInline, SongLinkInline]
     date_hierarchy = 'added'
 
+    def validate_file_field(self, file):
+        # Raise the default validation error if file isn't present, yet is
+        # required based on the (updated) status.
+        if not file \
+           and Song.status_requires_file(
+                self.request.POST.get('status', None),
+                self.request.POST.get('legacy_flag', None)):
+            from django.core.exceptions import ValidationError
+            from django.forms import Field
+            raise ValidationError(Field.default_error_messages['required'])
+
+        from django.forms.fields import FileField
+        super(FileField, self.form_instance.base_fields['file']).validate(file)
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.request = request
+
+        form = super(SongAdmin, self).get_form(request, obj=obj, **kwargs)
+        self.form_instance = form
+
+        # Override file field requirement and validation
+        form.base_fields['file'].required = False
+        form.base_fields['file'].validate = self.validate_file_field
+
+        return form
+
 class QueueAdmin(admin.ModelAdmin):
     list_display = ('song', 'requested', 'played', 'requested_by', 'priority', 'playtime')
     search_fields = ['song', 'requested_by__username']
