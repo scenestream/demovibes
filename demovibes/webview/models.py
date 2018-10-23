@@ -1115,7 +1115,7 @@ class Song(models.Model):
 
     @staticmethod
     def status_requires_file(status, legacy_flag=None):
-        return status != 'K' and legacy_flag != 'M'
+        return (status in ['A', 'N'] and legacy_flag != 'M') or status == 'J'
 
     class Meta:
         ordering = ['title']
