@@ -1111,7 +1111,7 @@ class Song(models.Model):
         """
         Check if song is considered active.
         """
-        return (self.status == "A" or self.status == "N") and getattr(self, 'legacy_flag', None) != "M"
+        return (self.status == "A" or self.status == "N") and self.file is not None
 
     @staticmethod
     def status_requires_file(status, legacy_flag=None):

@@ -77,7 +77,8 @@ class ActiveSongManager(models.Manager):
     def get_query_set(self):
         songs = super(ActiveSongManager, self).get_query_set()
         if songs and hasattr(songs[0], 'legacy_flag'):
-            return ((songs.filter(status='A')
-                    | songs.filter(status='N')).exclude(legacy_flag='M'))
+            songs = songs.filter(status='A') | songs.filter(status='N')
         else:
-            return songs.filter(status='A')
+            songs = songs.filter(status='A')
+
+        return songs.exclude(file='')
