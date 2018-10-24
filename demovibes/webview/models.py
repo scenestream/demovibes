@@ -1114,12 +1114,12 @@ class Song(models.Model):
         return Song.status_is_requestable(self.status) and self.file is not None
 
     @staticmethod
-    def status_is_requestable(status, legacy_flag=None):
-        return status in ['A', 'N'] and legacy_flag != 'M'
+    def status_is_requestable(status):
+        return status in ['A', 'N']
 
     @staticmethod
-    def status_requires_file(status, legacy_flag=None):
-        return Song.status_is_requestable(status, legacy_flag) or status == 'J'
+    def status_requires_file(status):
+        return Song.status_is_requestable(status) or status == 'J'
 
     class Meta:
         ordering = ['title']

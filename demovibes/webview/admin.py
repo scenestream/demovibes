@@ -83,8 +83,7 @@ class SongAdmin(admin.ModelAdmin):
         # required based on the (updated) status.
         if not file \
            and Song.status_requires_file(
-                self.request.POST.get('status', None),
-                self.request.POST.get('legacy_flag', None)):
+                self.request.POST.get('status', None)):
             from django.core.exceptions import ValidationError
             from django.forms import Field
             raise ValidationError(Field.default_error_messages['required'])
