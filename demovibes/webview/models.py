@@ -2092,7 +2092,7 @@ def set_song_values(sender, **kwargs):
 
 
     if (not song.song_length) \
-       and status != 'K' and song.file and os.path.isfile(song.file.path):
+       and song.status != 'K' and song.file and os.path.isfile(song.file.path):
         try:
             song.set_song_data()
         except:
