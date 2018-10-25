@@ -889,10 +889,12 @@ class editSonginfo(SongView):
 @login_required
 def edit_songinfo(request, song_id):
     song = get_object_or_404(m.Song, id=song_id)
+    replaceable = song.can_be_replaced() and not song.has_pending_file_approval()
     meta = song.get_metadata()
     meta.comment = ""
 
     form2 = False
+    upload_form = None
     if (request.user.get_profile().have_artist() and request.user.artist in meta.artists.all()) or (request.user.is_staff):
         form2 = f.SongLicenseForm(instance=song)
 
@@ -905,15 +907,79 @@ def edit_songinfo(request, song_id):
                 song.log(request.user, "Changed song license to %s" % s.license)
                 return redirect(song)
         else:
+            if replaceable:
+                upload_form = f.MetadataUploadForm(request.POST, request.FILES, instance=meta)
             form = f.EditSongMetadataForm(request.POST, instance=meta)
-            if form.is_valid():
+            if form.is_valid() and (not upload_form or upload_form.is_valid()):
+                if upload_form:
+                    upload_form.save()
                 form.save()
                 return redirect(song)
     else:
+        if replaceable:
+            upload_form = f.MetadataUploadForm(instance=meta)
         form = f.EditSongMetadataForm(instance=meta)
 
-    c = {'form': form, 'song': song, 'form2': form2}
+    # c = {'form': form, 'song': song, 'form2': form2}
+    c = {'form': form, 'song': song, 'form2': form2, 'upload_form': upload_form}
     return j2shim.r2r("webview/edit_songinfo.html", c, request)
+
+@login_required
+def upload_song_file(request, song_id):
+    song = get_object_or_404(m.Song, id=song_id)
+
+    upload_form = comment_form = None
+
+    def update_many_to_many(new_row, ori_row, forms):
+        from django.db.models.fields.related import ManyToManyField
+
+        modifiable_fields = []
+        for form in forms:
+            modifiable_fields.append(form.fields.keys())
+
+        meta = new_row._meta
+        for field in meta.get_all_field_names():
+            if field not in modifiable_fields \
+               and isinstance(meta.get_field(field), ManyToManyField):
+                getattr(new_row, field).add(*getattr(ori_row, field).all())
+
+    if song.can_be_replaced() and not song.has_pending_file_approval():
+        if request.method == "POST":
+            ori_meta = song.get_metadata()
+            from copy import deepcopy
+            meta = deepcopy(ori_meta)
+            meta.pk = None
+            meta.user = request.user
+            meta.checked = False
+            meta.active = False
+            meta.file = ''
+            meta.comment = ""
+
+            comment_form = f.MetadataCommentForm(request.POST, instance=meta)
+            upload_form = f.MetadataUploadForm(request.POST, request.FILES,
+                                               instance=meta,
+                                               file_is_required=comment_form.fields['comment'] is None)
+
+            # assert False, comment_form.__dict__
+            if upload_form.is_valid() and comment_form.is_valid():
+                meta.save()
+
+                # Copy artists, groups, ...
+                update_many_to_many(meta, ori_meta, [upload_form, comment_form])
+
+                # For cacheing reasons
+                song.save()
+
+                return redirect(song)
+        else:
+            # instance=meta is not needed here as a parameter for the forms
+            # because we want the fields empty by default anyway.
+            upload_form = f.MetadataUploadForm()
+            comment_form = f.MetadataCommentForm()
+
+    c = {'upload_form': upload_form, 'comment_form': comment_form, 'song': song}
+    return j2shim.r2r("webview/upload_song_file.html", c, request)
+
 
 @login_required
 def upload_song(request, artist_id):
@@ -982,6 +1048,7 @@ def upload_song(request, artist_id):
     return j2shim.r2r('webview/upload.html', \
         {'form' : form, 'infoform': infoform, 'artist' : artist, 'links': links }, \
         request=request)
+
 
 @permission_required('webview.change_song')
 def activate_upload(request):

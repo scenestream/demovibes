@@ -31,7 +31,17 @@
         <th>{{ gettext("Changed fields") }}</th>
         <td>{{ meta.get_changelist()|join(", ") }}</td>
     </tr>
-</table>
+    {% if 'file' in meta.get_changelist() %}
+    <tr>
+TODO: gen previewing. Show song lengths (new, current site, old site)
+        <th>{{ gettext("Preview") }}:</th>
+        <td>
+            <audio controls>
+                <source src="/media/music/previews/{{ meta.song_id }}.mp3"/>
+            </audio>
+        </td>
+    </tr>
+    {% endif %}</table>
 
 <h2><img class="icon_header" src="{{ STATIC_URL }}sound.png" alt="" />{{ gettext("Song Information") }}</h2>
 <table>

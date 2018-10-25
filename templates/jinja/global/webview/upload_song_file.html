@@ -1,0 +1,28 @@
+{% extends "base/base.html" %}
+{% import "macro/display.html" as display %}
+{% block title %}{{ gettext("Replace song file") }}{% endblock %}
+
+{% block main %}
+<h2><img class="icon_header" src="{{ STATIC_URL }}script.png" alt="" />{{ gettext("Replace Song File For") }} {{ song }}</h2>
+{% if song.can_be_replaced() and not song.has_pending_file_approval() %}
+<p>{{ gettext("Replace file for song") }} <a href="{{ song.get_absolute_url() }}">{{ song }}</a></p>
+
+<p>{{ gettext("The information here will be submitted, but won't be active until a moderator has checked and approved it.") }}</p>
+
+<form action="." method="post" enctype="multipart/form-data">
+<table>
+    {% if upload_form %}{{ upload_form.as_table() }}{% endif %}
+    {% if comment_form %}{{ comment_form.as_table() }}{% endif %}
+</table>
+<input type="submit" value="{{ gettext("Submit data") }}">
+</form>
+{% else %}
+{% include "webview/t/songname.html" %}
+  {% if song.has_pending_file_approval() %}
+<p>{{ gettext("The file for this song already is being replaced and pending approval.") }}</p>
+  {% else %}
+<p>{{ gettext("This song doesn't appear to need its file replaced.") }}</p>
+  {% endif %}
+{% endif %}
+
+{% endblock %}

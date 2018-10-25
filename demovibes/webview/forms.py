@@ -1,6 +1,8 @@
 from webview import models as M
 from django import forms
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
+
 from PIL import Image
 #import mimetypes
 import dscan
@@ -17,11 +19,8 @@ class OnelinerHistory(forms.Form):
     start = forms.IntegerField(min_value=0, max_value=200,initial=0)
     results = forms.IntegerField(min_value=10, max_value=100,initial=10)
 
-class UploadForm(forms.ModelForm):
-    class Meta:
-        model = M.Song
-        fields = ["file", "title"]
 
+class _UploadFormBase(forms.ModelForm):
     def clean_file(self):
         data = self.cleaned_data['file']
 
@@ -50,10 +49,40 @@ class UploadForm(forms.ModelForm):
 
         return data
 
+
+class UploadForm(_UploadFormBase):
+    class Meta:
+        model = M.Song
+        fields = ["file", "title"]
+
+
 class SongMetadataForm(forms.ModelForm):
     class Meta:
         fields = ["release_year", "remix_of_id", "groups", "labels", "info", "type", "platform", "pouetid", "ytvidid", "ytvidoffset"]
         model = M.SongMetaData
+
+class MetadataUploadForm(_UploadFormBase):
+    class Meta:
+        model = M.SongMetaData
+        fields = []
+        if M.site_supports_song_file_replacements():
+            fields.append('file')
+
+    def __init__(self, *args, **kwargs):
+        file_is_required = kwargs.pop('file_is_required', False)
+        super(MetadataUploadForm, self).__init__(*args, **kwargs)
+
+        if 'file' in self.fields:
+            self.fields['file'].label = _('Replacement File')
+            if file_is_required:
+                self.fields['file'].required = True
+
+
+class MetadataCommentForm(forms.ModelForm):
+    class Meta:
+        model = M.SongMetaData
+        fields = ['comment']
+
 
 class EditSongMetadataForm(forms.ModelForm):
     class Meta:
