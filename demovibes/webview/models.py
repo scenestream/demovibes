@@ -926,7 +926,7 @@ class SongMetaData(models.Model):
 
     artists = models.ManyToManyField(Artist, null = True, blank = True, help_text="Select all artists involved with creating this song. ")
     if site_supports_song_file_replacements():
-        file = models.FileField(blank=True, upload_to=create_song_replacement_path, verbose_name="Optional Replacement File", max_length=200, help_text="Select a module (MOD, XM, etc...) or audio file (MP3, OGG, etc...) to upload. See <a href='../../../faq/'>FAQ</a> for details.<br><b>Note:</b>If the file is online, fill in the URL as a Comment instead.")
+        file = models.FileField(null=True, blank=True, upload_to=create_song_replacement_path, verbose_name="Optional Replacement File", max_length=200, help_text="Select a module (MOD, XM, etc...) or audio file (MP3, OGG, etc...) to upload. See <a href='../../../faq/'>FAQ</a> for details.<br><b>Note:</b>If the file is online, fill in the URL as a Comment instead.")
     groups = models.ManyToManyField(Group, null = True, blank = True)
     info = models.TextField(blank = True, help_text="Additional Song information. BBCode tags are supported. No HTML.")
     labels = models.ManyToManyField(Label, null = True, blank = True) # Production labels
@@ -999,6 +999,26 @@ class SongMetaData(models.Model):
                 self.song.status = 'K'
         self.song.reset_pouetinfo()
         self.song.save() #For cache updates
+
+    def is_file_change(self):
+        # NOTE: Don't compare with "is not None", it will always be True!
+        return self.file != None
+
+    def save(self, *args, **kwargs):
+        
+        set_file_to_none = not self.is_file_change()
+
+        result = super(SongMetaData, self).save(*args, **kwargs)
+
+        if set_file_to_none:
+            # Before 'file' was set to None which means it didn't come from
+            # Replace Song file form but Edit Information. Django changes
+            # file to '' (see https://code.djangoproject.com/ticket/25528 for
+            # a failing test case) during save. Restore it to NULL using an
+            # update().
+            SongMetaData.objects.filter(id=self.id).update(file=None)
+
+        return result
 
 class ObjectLog(models.Model):
     content_type = models.ForeignKey(ContentType)
@@ -1191,11 +1211,11 @@ class Song(models.Model):
         # if not self.can_be_replaced():
         #     return False
 
-        # Don't exclude file='' here because a comment could have only been
-        # filled in.
-        has_pending_files = SongMetaData.objects.filter(
-            song_id=self.id, checked=False, active=False).exclude()  # file='')
-        return len(has_pending_files) != 0
+        # Exclude file=None which are metadata (edits) with no file set.
+        # This ensures only metadata objects involving file changes are
+        # considering for pending, and not 'ordinary' edits.
+        return SongMetaData.objects.filter(song_id=self.id,
+            checked=False, active=False).exclude(file=None).count() > 0
 
     def get_status_display(self):
         """
@@ -1476,6 +1496,12 @@ class Song(models.Model):
         self.startswith = S
         return super(Song, self).save(*args, **kwargs)
 
+    def touch(self):
+        """
+        Invalidate site cache fragments that key on a song's last_changed
+        """
+        Song.objects.filter(id=self.id).update(
+            last_changed=datetime.datetime.now())
 
     def artist(self):
         """

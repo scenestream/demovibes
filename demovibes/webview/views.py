@@ -864,6 +864,8 @@ def view_songinfo(request, songinfo_id):
             meta.checked = True
             meta.song.log(request.user, "Rejected metadata %s" % meta.id)
             meta.save()
+            if meta.is_file_change():
+                meta.song.touch()
     c = {'meta': meta }
     return j2shim.r2r("webview/view_songinfo.html", c, request)
 
@@ -913,11 +915,14 @@ def edit_songinfo(request, song_id):
             if form.is_valid() and (not upload_form or upload_form.is_valid()):
                 if upload_form:
                     upload_form.save()
+                    if 'file' in request.FILES:
+                        song.touch()
+
                 form.save()
                 return redirect(song)
     else:
         if replaceable:
-            upload_form = f.MetadataUploadForm(instance=meta)
+            upload_form = f.MetadataUploadForm()
         form = f.EditSongMetadataForm(instance=meta)
 
     # c = {'form': form, 'song': song, 'form2': form2}
@@ -955,26 +960,22 @@ def upload_song_file(request, song_id):
             meta.file = ''
             meta.comment = ""
 
-            comment_form = f.MetadataCommentForm(request.POST, instance=meta)
+            file_is_required = not request.POST.get('comment', '')
             upload_form = f.MetadataUploadForm(request.POST, request.FILES,
                                                instance=meta,
-                                               file_is_required=comment_form.fields['comment'] is None)
+                                               file_is_required=file_is_required)
+            comment_form = f.MetadataCommentForm(request.POST, instance=meta)
 
-            # assert False, comment_form.__dict__
             if upload_form.is_valid() and comment_form.is_valid():
+                # First must save, then can copy artists, groups, ...
                 meta.save()
-
-                # Copy artists, groups, ...
                 update_many_to_many(meta, ori_meta, [upload_form, comment_form])
 
-                # For cacheing reasons
-                song.save()
+                song.touch()
 
                 return redirect(song)
         else:
-            # instance=meta is not needed here as a parameter for the forms
-            # because we want the fields empty by default anyway.
-            upload_form = f.MetadataUploadForm()
+            upload_form = f.MetadataUploadForm(file_is_required=True)
             comment_form = f.MetadataCommentForm()
 
     c = {'upload_form': upload_form, 'comment_form': comment_form, 'song': song}

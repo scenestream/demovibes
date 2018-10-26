@@ -72,10 +72,21 @@ class MetadataUploadForm(_UploadFormBase):
         file_is_required = kwargs.pop('file_is_required', False)
         super(MetadataUploadForm, self).__init__(*args, **kwargs)
 
-        if 'file' in self.fields:
-            self.fields['file'].label = _('Replacement File')
-            if file_is_required:
-                self.fields['file'].required = True
+        # Don't pass an instance of meta the first time: it makes the file
+        # field pre-filled and clearable, while we wan't it to appear empty
+        # and optionally be required.
+        if not 'file' in args:
+            assert not 'instance' in args, "Don't pass instance with initial non-POST ctor"
+
+        field = 'file'
+        if file_is_required and field in self.fields:
+            self.fields[field].required = True
+
+            # Change the label the first time only (when not POSTing yet).
+            # It appears harmless to change during POST but is useless anyway
+            # so just don't do it.
+            if not args:
+                self.fields[field].label = _('Replacement File')
 
 
 class MetadataCommentForm(forms.ModelForm):
