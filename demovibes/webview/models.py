@@ -1236,7 +1236,7 @@ class Song(models.Model):
                 full_status = "Missing"
 
         if self.has_pending_file_approval():
-            return '{0} <sup>[pending]</sup>'.format(full_status)
+            return '{0} *'.format(full_status)
 
         return '{0} <a class="replace-song-link" href="{1}">*</a>'.format(full_status, self.get_absolute_url() + 'upload/')
 
