@@ -4,6 +4,7 @@
 
 {% block main %}
 <h2><img class="icon_header" src="{{ STATIC_URL }}sound.png" alt="" />{{ gettext("Upload A New Song") }}</h2>
+<p><b>Please also read {{ '[FAQ]11[/FAQ]' | bbcode }} before uploading</b></p>
 <p>{{ gettext("Use this form to upload a new song to the database. All uploads are checked by a moderator before being approved. Please try to fill in as much information as you can about the entry to make the job easier on the moderators.") }}</p>
 
 {% include "webview/upload_instructions.html" %}
