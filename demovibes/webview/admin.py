@@ -76,10 +76,16 @@ class SongAdmin(admin.ModelAdmin):
     ]
     if has_legacy_flag():
 		list_display.append('legacy_flag')
-		list_editable.append('legacy_flag')
 		fieldsets[0][1]['fields'].insert(4, 'legacy_flag')
     inlines = [DownloadInline, SongLinkInline]
     date_hierarchy = 'added'
+
+    def get_readonly_fields(self, request, obj=None):
+        key = 'legacy_flag'
+        if key in SongAdmin.list_display:
+            return [key]
+
+        return []
 
     def validate_status_field(self, new_status):
         had_file = not not self.song.file
@@ -94,6 +100,11 @@ class SongAdmin(admin.ModelAdmin):
         if legacy_flag:
             if not will_have_new_file and new_status == 'A' and legacy_flag == 'R':
                 raise ValidationError(_('File is recovered: Status should not be Active (intended for replaced files). Either change status to e.g. Needs Re-Encoding (intended for recovered and playable songs) or select a replacement file.'))
+
+            if will_have_new_file and legacy_flag != ' ':
+                # Can't change POST['legacy_flag'] here because legacy_flag is
+                # a read-only field and not taken into account.
+                self.song.legacy_flag = ' '
 
         from django.forms.fields import TypedChoiceField
         super(TypedChoiceField, self.form_instance.base_fields['status']).validate(new_status)
