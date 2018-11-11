@@ -1,14 +1,14 @@
 {% import "macro/display.html" as display -%}
 <html>
 <head><title>{{ song }} {{ gettext("playing") }}</title>
-	{% if not song.has_prelisten() %}
+	{% if not song.prelisten().exists() %}
 	<meta http-equiv="refresh" content="10">
 	{% endif %}
 </head>
 <body>
 <p>{{ gettext("Song") }}: {{ display.song(song) }}</p>
 {% set songurl = song.get_download_url(user) %}
-{% if song.has_prelisten() %}
+{% if song.prelisten().exists() %}
 <audio controls>
 	<source src="/media/music/prelisten/{{ song.id }}.mp3"/>
 </audio>
