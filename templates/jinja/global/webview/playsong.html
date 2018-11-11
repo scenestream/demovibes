@@ -1,19 +1,19 @@
 {% import "macro/display.html" as display -%}
 <html>
 <head><title>{{ song }} {{ gettext("playing") }}</title>
-	{% if not song.has_preview() %}
+	{% if not song.has_prelisten() %}
 	<meta http-equiv="refresh" content="10">
 	{% endif %}
 </head>
 <body>
 <p>{{ gettext("Song") }}: {{ display.song(song) }}</p>
 {% set songurl = song.get_download_url(user) %}
-{% if song.has_preview() %}
+{% if song.has_prelisten() %}
 <audio controls>
-	<source src="/media/music/previews/{{ song.id }}.mp3"/>
+	<source src="/media/music/prelisten/{{ song.id }}.mp3"/>
 </audio>
 {% else %}
-<p>Generating audio stream... please refresh in a minute or two.</p>
+<p>Generating audio for prelistening... please refresh in a minute or two.</p>
 {% endif %}
 <a href="{{ songurl }}">Download song</a>
 {% if limit != None %}<p>This song link will only be valid for <b>60</b> seconds after this window was opened.</p>{% endif %}

@@ -36,13 +36,13 @@
   <a href="{{ url("dv-uploads") }}?song={{song.id}}&amp;status=A"><img src="{{ STATIC_URL }}thumb_up.png" title="Approve" alt="Approve" /></a>
  </td>
  <td>
-	 {% if song.has_preview() %}
+	 {% if song.has_prelisten() %}
 	 <!-- {% include "webview/t/flash_playsong.html" %} -->
 	 <audio controls>
-		 <source src="/media/music/previews/{{ song.id }}.mp3"/>
+		 <source src="/media/music/prelisten/{{ song.id }}.mp3"/>
 	 </audio>
 	 {% else %}
-	 <p>Preview unavailable; refresh or contact administrator</p>
+	 <p>Prelistening unavailable; refresh or contact administrator</p>
 	 {% endif %}
  </td>
  <td>
