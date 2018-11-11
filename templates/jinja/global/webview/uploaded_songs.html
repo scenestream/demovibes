@@ -39,7 +39,7 @@
 	 {% if song.prelisten().exists() %}
 	 <!-- {% include "webview/t/flash_playsong.html" %} -->
 	 <audio controls>
-		 <source src="/media/music/prelisten/{{ song.id }}.mp3"/>
+		 <source src="{{ song.prelisten().url() }}"/>
 	 </audio>
 	 {% else %}
 	 <p>Prelistening unavailable; refresh or contact administrator</p>

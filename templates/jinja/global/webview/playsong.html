@@ -10,7 +10,7 @@
 {% set songurl = song.get_download_url(user) %}
 {% if song.prelisten().exists() %}
 <audio controls>
-	<source src="/media/music/prelisten/{{ song.id }}.mp3"/>
+	<source src="{{ song.prelisten().url() }}"/>
 </audio>
 {% else %}
 <p>Generating audio for prelistening... please refresh in a minute or two.</p>

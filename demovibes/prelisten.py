@@ -10,12 +10,17 @@ log = logging.getLogger("dv.prelisten")
 
 
 class Prelisten(object):
+    REL_URL = 'media/music/prelisten/'
+
     def __init__(self, file_path, song_id):
         self.file_path = file_path
         self.id = song_id
         self.prelisten_dir = \
             os.path.join(getattr(settings, 'MEDIA_ROOT', False)
-                         + 'media/music/prelisten/')
+                         + Prelisten.REL_URL)
+
+    def url(self):
+        return os.path.join('/' + Prelisten.REL_URL, str(self.id) + '.mp3')
 
     def path(self):
         return os.path.join(self.prelisten_dir, str(self.id) + '.mp3')
