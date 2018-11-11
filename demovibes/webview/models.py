@@ -1108,7 +1108,7 @@ class Song(models.Model):
         lame = getattr(settings, 'LAME', "/usr/bin/lame")
         ret = subprocess.call([dscan, "-o", wav_path, self.file.path])
         if ret != 0:
-            log.debug("Could not dscan %s to %s: %s" % (self.file, wav_path, "some reason"))
+            log.debug("Could not dscan %s to %s: %s" % (self.file.path, wav_path, "some reason"))
             return
         ret = subprocess.call([lame, "-S", wav_path, mp3_path])
         if ret != 0:
