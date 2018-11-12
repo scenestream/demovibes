@@ -1092,9 +1092,6 @@ class Song(models.Model):
     def prelisten(self):
         return prelisten.Prelisten(self.file.path, self.id)
 
-    def ensure_prelisten(self):
-        return self.prelisten().ensure_prelisten()
-
     def has_video(self):
         return self.get_metadata().ytvidid
 
