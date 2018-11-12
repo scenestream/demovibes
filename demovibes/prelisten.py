@@ -17,9 +17,10 @@ class Prelisten(object):
 
     def __init__(self, file_path):
         self.file_path = file_path
+        self.is_valid = not not self.file_path and os.path.isfile(self.file_path)
 
     def valid(self):
-        return not not self.file_path
+        return self.is_valid
 
     def busy(self):
         return os.path.isfile(self.flag_path())
