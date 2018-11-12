@@ -162,7 +162,7 @@ class PlaySong(SongView):
         return self.song.downloadable_by(self.request.user)
 
     def set_context(self):
-        self.song.prelisten().create_in_background()  # this may be the wrong place, but not sure where to put it
+        self.song.prelisten().generate()  # this may be the wrong place, but not sure where to put it
         limit, total = m.protected_downloads.get_current_download_limits_for(self.request.user)
         self.song.log(self.request.user, "Song preview / download")
         return {'song': self.song, 'limit': limit, 'total': total}
@@ -1045,7 +1045,7 @@ def upload_song(request, artist_id):
                     Q = m.SongApprovals(song = new_song, approved_by=request.user, uploaded_by=request.user)
                     Q.save()
             else:  # unapproved song; generate prelisten file
-                new_song.prelisten().create_in_background()
+                new_song.prelisten().generate()
             return HttpResponseRedirect(new_song.get_absolute_url())
     else:
         form = f.UploadForm()
