@@ -6,12 +6,15 @@ import datetime
 
 import re
 import os.path
+import subprocess
 from django.utils import simplejson
 from django.conf import settings
 from django.core.mail import EmailMessage
 #from django.core.urlresolvers import reverse
 import dscan
 import logging
+import prelisten
+
 import xml.dom.minidom, urllib # Needed for XML processing
 from django.core.cache import cache
 from django.template.defaultfilters import striptags
@@ -1171,6 +1174,9 @@ class Song(models.Model):
         if self.downloadable_by(user):
            return protected_downloads.get_song_url(self, user)
         return False
+
+    def prelisten(self):
+        return prelisten.Prelisten(self.file.path)
 
     def has_video(self):
         return self.get_metadata().ytvidid
