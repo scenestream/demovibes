@@ -16,9 +16,15 @@ class Prelisten(object):
 
     def __init__(self, file_path):
         self.file_path = file_path
+        if not self.valid():
+            return
+
         self.prelisten_dir = \
             os.path.join(getattr(settings, 'MEDIA_ROOT', False)
                          + Prelisten.REL_URL)
+
+    def valid(self):
+        return not not self.file_path
 
     def hash(self):
         hash_object = hashlib.md5(self.file_path)
@@ -36,9 +42,15 @@ class Prelisten(object):
     def exists(self):
         # This is a hack so that the templates can avoid showing a dead player
         # if the prelisten file hasn't been generated yet
+        if not self.valid():
+            return False
+
         return os.path.isfile(self.path())
 
     def create_in_background(self):
+        if not self.valid():
+            return
+
         # Prelisten files will be stored in a prelisten dir; we can use a
         # cron job to periodically purge it.
 
