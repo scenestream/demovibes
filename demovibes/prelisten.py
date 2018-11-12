@@ -68,7 +68,8 @@ class Prelisten(object):
             return
 
         mp3_path = self.path()
-        ret = subprocess.call([lame, "-S", wav_path, mp3_path])
+        ret = subprocess.call([lame, '-S', '--preset', 'standard',
+                               wav_path, mp3_path])
         if ret != 0:
             log.debug("Could not lame %s to %s: %s"
                       % (wav_path, mp3_path, "some reason"))
