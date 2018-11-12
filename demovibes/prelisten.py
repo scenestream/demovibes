@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import hashlib
 import os
 import subprocess
 import thread
@@ -13,21 +14,24 @@ log = logging.getLogger("dv.prelisten")
 class Prelisten(object):
     REL_URL = 'media/music/prelisten/'
 
-    def __init__(self, file_path, song_id):
+    def __init__(self, file_path):
         self.file_path = file_path
-        self.id = song_id
         self.prelisten_dir = \
             os.path.join(getattr(settings, 'MEDIA_ROOT', False)
                          + Prelisten.REL_URL)
 
+    def hash(self):
+        hash_object = hashlib.md5(self.file_path)
+        return hash_object.hexdigest()
+
     def url(self):
-        return os.path.join('/' + Prelisten.REL_URL, str(self.id) + '.mp3')
+        return os.path.join('/' + Prelisten.REL_URL, self.hash() + '.mp3')
 
     def path(self):
-        return os.path.join(self.prelisten_dir, str(self.id) + '.mp3')
+        return os.path.join(self.prelisten_dir, self.hash() + '.mp3')
 
     def flag_path(self):
-        return os.path.join(self.prelisten_dir, str(self.id) + '.enc')
+        return os.path.join(self.prelisten_dir, self.hash() + '.enc')
 
     def exists(self):
         # This is a hack so that the templates can avoid showing a dead player
@@ -59,7 +63,7 @@ class Prelisten(object):
 
         dscan = getattr(settings, 'DEMOSAUCE_SCAN', False)
         lame = getattr(settings, 'LAME', "/usr/bin/lame")
-        wav_path = self.prelisten_dir + str(self.id) + ".wav"
+        wav_path = os.path.join(self.prelisten_dir, self.hash() + '.wav')
 
         ret = subprocess.call([dscan, "-o", wav_path, self.file_path])
         if ret != 0:
