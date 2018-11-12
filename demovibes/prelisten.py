@@ -73,16 +73,15 @@ class Prelisten(object):
             os.symlink(self.file_path, self.path())
             return True
 
-        # Otherwise use dscan and lame to create one in a thread.
+        # Otherwise first create a 'flag' file that says encoding is in
+        # progress...
+        open(self.flag_path(), 'a').close()
+
+        # ... and use dscan and LAME to create a prelistening file in a thread.
         thread.start_new_thread(self.do_create, ())
         return False
 
     def do_create(self):
-        flag_path = self.flag_path()
-
-        # First create a 'flag' file that says encoding is in progress.
-        open(flag_path, 'a').close()
-
         dscan = getattr(settings, 'DEMOSAUCE_SCAN', False)
         lame = getattr(settings, 'LAME', "/usr/bin/lame")
         wav_path = self.path('.wav')
@@ -104,7 +103,7 @@ class Prelisten(object):
                       % (wav_path, mp3_path, "some reason"))
             return
 
-        os.unlink(flag_path)
+        os.unlink(self.flag_path())
 
         log.debug("Created prelisten file for %s at %s."
                   % (self.file_path, mp3_path))
