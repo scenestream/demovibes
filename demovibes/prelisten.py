@@ -26,6 +26,9 @@ class Prelisten(object):
     def valid(self):
         return not not self.file_path
 
+    def busy(self):
+        return os.path.isfile(self.flag_path())
+
     def hash(self):
         hash_object = hashlib.md5(self.file_path)
         return hash_object.hexdigest()
@@ -40,32 +43,44 @@ class Prelisten(object):
         return os.path.join(self.prelisten_dir, self.hash() + '.enc')
 
     def exists(self):
-        # This is a hack so that the templates can avoid showing a dead player
-        # if the prelisten file hasn't been generated yet
         if not self.valid():
             return False
 
         return os.path.isfile(self.path())
 
-    def create_in_background(self):
+    def generate(self):
+        """
+        Generates a prelisten file if needed.
+
+        Returns True if already available, False otherwise.
+
+        The return value is used by templates to either show an audio player
+        or a message while a prelisten file is being generated.
+        """
+
         if not self.valid():
-            return
+            return False
 
         # Prelisten files will be stored in a prelisten dir; we can use a
         # cron job to periodically purge it.
 
-        # Check if the prelisten file already exists, or is in progress.
-        if self.exists() or os.path.isfile(self.flag_path()):
-            return
+        # Check if the prelisten file already exists...
+        if self.exists():
+            return True
+
+        # ... or is in progress.
+        if self.busy():
+            return False
 
         unused_filename, file_ext = os.path.splitext(self.file_path)
         # If the file is already an mp3, make a symlink instead.
         if file_ext == '.mp3':
             os.symlink(self.file_path, self.path())
-            return
+            return True
 
         # Otherwise use dscan and lame to create one in a thread.
         thread.start_new_thread(self.do_create, ())
+        return False
 
     def do_create(self):
         flag_path = self.flag_path()
