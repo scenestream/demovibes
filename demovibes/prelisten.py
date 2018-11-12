@@ -13,15 +13,10 @@ log = logging.getLogger("dv.prelisten")
 
 class Prelisten(object):
     REL_URL = 'media/music/prelisten/'
+    dir = os.path.join(getattr(settings, 'MEDIA_ROOT', False) + REL_URL)
 
     def __init__(self, file_path):
         self.file_path = file_path
-        if not self.valid():
-            return
-
-        self.prelisten_dir = \
-            os.path.join(getattr(settings, 'MEDIA_ROOT', False)
-                         + Prelisten.REL_URL)
 
     def valid(self):
         return not not self.file_path
@@ -36,11 +31,11 @@ class Prelisten(object):
     def url(self):
         return os.path.join('/' + Prelisten.REL_URL, self.hash() + '.mp3')
 
-    def path(self):
-        return os.path.join(self.prelisten_dir, self.hash() + '.mp3')
+    def path(self, extension='.mp3'):
+        return os.path.join(Prelisten.dir, self.hash() + extension)
 
     def flag_path(self):
-        return os.path.join(self.prelisten_dir, self.hash() + '.enc')
+        return self.path('.enc')
 
     def exists(self):
         if not self.valid():
@@ -90,7 +85,7 @@ class Prelisten(object):
 
         dscan = getattr(settings, 'DEMOSAUCE_SCAN', False)
         lame = getattr(settings, 'LAME', "/usr/bin/lame")
-        wav_path = os.path.join(self.prelisten_dir, self.hash() + '.wav')
+        wav_path = self.path('.wav')
 
         ret = subprocess.call([dscan, "-o", wav_path, self.file_path])
         if ret != 0:
