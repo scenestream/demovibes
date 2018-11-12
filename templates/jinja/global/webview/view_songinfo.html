@@ -36,9 +36,13 @@
 TODO: gen previewing. Show song lengths (new, current site, old site)
         <th>{{ gettext("Preview") }}:</th>
         <td>
+          {% if meta.prelisten().exists() %}
             <audio controls>
-                <source src="/media/music/previews/{{ meta.song_id }}.mp3"/>
+                <source src="{{ meta.prelisten().url() }}"/>
             </audio>
+          {% else %}
+            <p>Generating audio for prelistening... please refresh in a minute or two.</p>
+          {% endif %}
         </td>
     </tr>
     {% endif %}</table>

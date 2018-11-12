@@ -1007,6 +1007,9 @@ class SongMetaData(models.Model):
         # NOTE: Don't compare with "is not None", it will always be True!
         return self.file != None
 
+    def prelisten(self):
+        return prelisten.Prelisten(self.file.path)
+
     def save(self, *args, **kwargs):
         
         set_file_to_none = not self.is_file_change()
