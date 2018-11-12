@@ -1231,7 +1231,7 @@ class Song(models.Model):
 
         if hasattr(self, 'legacy_flag'):
             if self.status == 'N' and self.legacy_flag == 'R':
-                full_status = Song.status_dict['A']
+                full_status = "Recovered"
             elif self.status == 'K' and not self.file:
                 full_status = "Missing"
 
