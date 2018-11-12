@@ -33,19 +33,38 @@
     </tr>
     {% if 'file' in meta.get_changelist() %}
     <tr>
-TODO: gen previewing. Show song lengths (new, current site, old site)
-        <th>{{ gettext("Preview") }}:</th>
+    TODO: Show song lengths/titles? (new, current site, old site)
+        <th></th>
+        <th>{{ gettext("Original") }}:</th>
+        <th>{{ gettext("Replacement") }}:</th>
+    </tr>
+    <tr>
+        <th>{{ gettext("Prelisten") }}:</th>
         <td>
-          {% if meta.prelisten().exists() %}
-            <audio controls>
-                <source src="{{ meta.prelisten().url() }}"/>
-            </audio>
+            {% if meta.song.file %}
+                {% if meta.song.prelisten().generate() %}
+                    <audio controls>
+                        <source src="{{ meta.song.prelisten().url() }}"/>
+                    </audio>
+                {% else %}
+                    <p>Generating audio for prelistening... please refresh in a minute or two.</p>
+                {% endif %}
+            {% else %}
+                Missing
+            {% endif %}
+        </td>
+        <td>
+            {% if meta.prelisten().generate() %}
+                <audio controls>
+                    <source src="{{ meta.prelisten().url() }}"/>
+                  </audio>
           {% else %}
-            <p>Generating audio for prelistening... please refresh in a minute or two.</p>
+                <p>Generating audio for prelistening... please refresh in a minute or two.</p>
           {% endif %}
         </td>
     </tr>
-    {% endif %}</table>
+    {% endif %}
+</table>
 
 <h2><img class="icon_header" src="{{ STATIC_URL }}sound.png" alt="" />{{ gettext("Song Information") }}</h2>
 <table>
