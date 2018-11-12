@@ -13,15 +13,10 @@ log = logging.getLogger("dv.prelisten")
 
 class Prelisten(object):
     REL_URL = 'media/music/prelisten/'
+    dir = os.path.join(getattr(settings, 'MEDIA_ROOT', False) + REL_URL)
 
     def __init__(self, file_path):
         self.file_path = file_path
-        if not self.valid():
-            return
-
-        self.prelisten_dir = \
-            os.path.join(getattr(settings, 'MEDIA_ROOT', False)
-                         + Prelisten.REL_URL)
 
     def valid(self):
         return not not self.file_path
@@ -36,11 +31,11 @@ class Prelisten(object):
     def url(self):
         return os.path.join('/' + Prelisten.REL_URL, self.hash() + '.mp3')
 
-    def path(self):
-        return os.path.join(self.prelisten_dir, self.hash() + '.mp3')
+    def path(self, extension='.mp3'):
+        return os.path.join(Prelisten.dir, self.hash() + extension)
 
     def flag_path(self):
-        return os.path.join(self.prelisten_dir, self.hash() + '.enc')
+        return self.path('.enc')
 
     def exists(self):
         if not self.valid():
@@ -78,19 +73,18 @@ class Prelisten(object):
             os.symlink(self.file_path, self.path())
             return True
 
-        # Otherwise use dscan and lame to create one in a thread.
+        # Otherwise first create a 'flag' file that says encoding is in
+        # progress...
+        open(self.flag_path(), 'a').close()
+
+        # ... and use dscan and LAME to create a prelistening file in a thread.
         thread.start_new_thread(self.do_create, ())
         return False
 
     def do_create(self):
-        flag_path = self.flag_path()
-
-        # First create a 'flag' file that says encoding is in progress.
-        open(flag_path, 'a').close()
-
         dscan = getattr(settings, 'DEMOSAUCE_SCAN', False)
         lame = getattr(settings, 'LAME', "/usr/bin/lame")
-        wav_path = os.path.join(self.prelisten_dir, self.hash() + '.wav')
+        wav_path = self.path('.wav')
 
         ret = subprocess.call([dscan, "-o", wav_path, self.file_path])
         if ret != 0:
@@ -101,13 +95,15 @@ class Prelisten(object):
         mp3_path = self.path()
         ret = subprocess.call([lame, '-S', '--preset', 'standard',
                                wav_path, mp3_path])
+
+        os.unlink(wav_path)
+
         if ret != 0:
             log.debug("Could not lame %s to %s: %s"
                       % (wav_path, mp3_path, "some reason"))
             return
 
-        os.unlink(wav_path)
-        os.unlink(flag_path)
+        os.unlink(self.flag_path())
 
         log.debug("Created prelisten file for %s at %s."
                   % (self.file_path, mp3_path))
