@@ -992,6 +992,9 @@ class SongMetaData(models.Model):
             # file to be playable
             if self.song.status in ['K', 'N']:
                 self.song.status = 'A'
+            if hasattr(self.song, 'legacy_flag'):
+                self.song.legacy_flag = ' '
+
             self.song.file = self.file
 
             try:
