@@ -14,10 +14,13 @@ log = logging.getLogger("dv.prelisten")
 class Prelisten(object):
     REL_URL = 'media/music/prelisten/'
     dir = os.path.join(getattr(settings, 'MEDIA_ROOT', False) + REL_URL)
+    root_dir_exists = os.path.isdir(dir)
 
     def __init__(self, file_path):
         self.file_path = file_path
-        self.is_valid = not not self.file_path and os.path.isfile(self.file_path)
+        self.is_valid = (Prelisten.root_dir_exists
+                         and (not not self.file_path)
+                         and os.path.isfile(self.file_path))
 
     def valid(self):
         return self.is_valid
