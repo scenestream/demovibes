@@ -6,7 +6,6 @@ import datetime
 
 import re
 import os.path
-import subprocess
 from django.utils import simplejson
 from django.conf import settings
 from django.core.mail import EmailMessage
