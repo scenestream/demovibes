@@ -13,7 +13,7 @@
 	<source src="{{ song.prelisten().url() }}"/>
 </audio>
 {% else %}
-<p>Generating audio for prelistening... please refresh in a minute or two.</p>
+<p>Generating audio for prelistening... Refreshing after 10 seconds.</p>
 {% endif %}
 <a href="{{ songurl }}">Download song</a>
 {% if limit != None %}<p>This song link will only be valid for <b>60</b> seconds after this window was opened.</p>{% endif %}
