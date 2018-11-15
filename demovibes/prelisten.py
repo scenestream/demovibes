@@ -12,7 +12,7 @@ log = logging.getLogger("dv.prelisten")
 
 
 class Prelisten(object):
-    REL_URL = 'media/music/prelisten/'
+    REL_URL = 'media/prelisten/'
     dir = os.path.join(getattr(settings, 'MEDIA_ROOT', False) + REL_URL)
     root_dir_exists = os.path.isdir(dir)
 
