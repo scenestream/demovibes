@@ -1263,7 +1263,8 @@ class Song(models.Model):
         Check if song needs replacing.
         """
 
-        return self.status in ['K', 'N'] or not self.file
+        return self.status in ['K', 'N'] or not self.file \
+               or (hasattr(self, 'legacy_flag') and self.legacy_flag != ' ')
 
     def can_be_replaced(self):
         """
