@@ -995,6 +995,10 @@ class SongMetaData(models.Model):
                 self.song.legacy_flag = ' '
 
             self.song.file = self.file
+            # Must unset loopfade_time here:
+            # If it's already set but not required for the new file then
+            # loopfade_time doesn't get set to 0 as part of the scan process.
+            self.song.loopfade_time = 0
 
             try:
                 self.song.set_song_data()
