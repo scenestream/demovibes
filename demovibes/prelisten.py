@@ -81,7 +81,7 @@ class Prelisten(object):
 
         unused_filename, file_ext = os.path.splitext(self.file_path)
         # If the file is already an mp3, make a symlink instead.
-        if file_ext == '.mp3':
+        if file_ext in ['.mp3', '.MP3']:
             os.symlink(self.file_path, self.path())
             return True
 
