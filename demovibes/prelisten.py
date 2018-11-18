@@ -71,13 +71,13 @@ class Prelisten(object):
         # Prelisten files will be stored in a prelisten dir; we can use a
         # cron job to periodically purge it.
 
-        # Check if the prelisten file already exists...
-        if self.exists():
-            return True
-
-        # ... or is in progress.
+        # Check if the prelisten file is in progress...
         if self.busy():
             return False
+
+        # ... or already exists.
+        if self.exists():
+            return True
 
         unused_filename, file_ext = os.path.splitext(self.file_path)
         # If the file is already an mp3, make a symlink instead.
