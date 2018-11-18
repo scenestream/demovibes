@@ -105,16 +105,18 @@ class Prelisten(object):
             return
 
         mp3_path = self.path()
+        encoding_path = mp3_path + '.encoding'
         ret = subprocess.call([lame, '-S', '--preset', 'standard',
-                               wav_path, mp3_path])
+                               wav_path, encoding_path])
 
         os.unlink(wav_path)
 
         if ret != 0:
             log.debug("Could not lame %s to %s: %s"
-                      % (wav_path, mp3_path, "some reason"))
+                      % (wav_path, encoding_path, "some reason"))
             return
 
+        os.rename(encoding_path, mp3_path)
         os.unlink(self.flag_path())
 
         log.debug("Created prelisten file for %s at %s."
