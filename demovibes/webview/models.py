@@ -172,7 +172,10 @@ def add_event(event = None, user = None, eventlist = [], metadata = {}):
                     return False
                 return r
             else:
-                uwsgi.send_uwsgi_message(uwsgi_event_server[0], uwsgi_event_server[1], 33, 17, data, 30)
+                try:
+                    uwsgi.send_message(uwsgi_event_server[0] + ':' + str(uwsgi_event_server[1]), 33, 17, data, 30)
+                except AttributeError:
+                    uwsgi.send_uwsgi_message(uwsgi_event_server[0], uwsgi_event_server[1], 33, 17, data, 30)
 
 from managers import LockingManager, ActiveSongManager
 
