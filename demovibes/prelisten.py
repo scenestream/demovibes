@@ -23,8 +23,9 @@ class Prelisten(object):
     except:  # Bare excepts not encouraged but we really want to catch all!
         pass
 
-    def __init__(self, file_path):
+    def __init__(self, file_path, filename_prefix=''):
         self.file_path = file_path
+        self.filename_prefix = filename_prefix
         self.is_valid = (Prelisten.root_dir_exists
                          and Prelisten.has_encoder
                          and (not not self.file_path)
@@ -37,8 +38,7 @@ class Prelisten(object):
         return os.path.isfile(self.flag_path())
 
     def hash(self):
-        hash_object = hashlib.md5(self.file_path)
-        return hash_object.hexdigest()
+        return self.filename_prefix + hashlib.md5(self.file_path).hexdigest()
 
     def url(self):
         return os.path.join('/' + Prelisten.REL_URL, self.hash() + '.mp3')
