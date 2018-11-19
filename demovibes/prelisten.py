@@ -26,10 +26,11 @@ class Prelisten(object):
     def __init__(self, file_path, filename_prefix=''):
         self.file_path = file_path
         self.filename_prefix = filename_prefix
+        self.source_file_exists = (not not self.file_path) \
+            and os.path.isfile(self.file_path)
         self.is_valid = (Prelisten.root_dir_exists
                          and Prelisten.has_encoder
-                         and (not not self.file_path)
-                         and os.path.isfile(self.file_path))
+                         and self.source_file_exists)
 
     def valid(self):
         return self.is_valid
@@ -48,6 +49,12 @@ class Prelisten(object):
 
     def flag_path(self):
         return self.path('.enc')
+
+    def encoding_path(self):
+        return self.path() + '.encoding'
+
+    def wav_path(self):
+        return self.path('.wav')
 
     def exists(self):
         if not self.valid():
@@ -96,7 +103,7 @@ class Prelisten(object):
     def do_create(self):
         dscan = getattr(settings, 'DEMOSAUCE_SCAN', False)
         lame = getattr(settings, 'LAME', "/usr/bin/lame")
-        wav_path = self.path('.wav')
+        wav_path = self.wav_path()
 
         ret = subprocess.call([dscan, "-o", wav_path, self.file_path])
         if ret != 0:
@@ -104,12 +111,13 @@ class Prelisten(object):
                       % (self.file_path, wav_path, "some reason"))
             return
 
-        mp3_path = self.path()
-        encoding_path = mp3_path + '.encoding'
+        encoding_path = self.encoding_path()
         ret = subprocess.call([lame, '-S', '--preset', 'standard',
                                wav_path, encoding_path])
 
         ok = (ret == 0)
+        mp3_path = self.path()
+
         if ok:
             os.rename(encoding_path, mp3_path)
             os.unlink(self.flag_path())
@@ -122,3 +130,28 @@ class Prelisten(object):
         else:
             log.debug("Could not lame %s to %s: %s"
                       % (wav_path, encoding_path, "some reason"))
+
+    def status(self):
+        if not self.valid():
+            if not Prelisten.root_dir_exists:
+                return "prelisten dir missing"
+            elif not Prelisten.has_encoder:
+                return "encoder missing"
+            elif not self.file_path:
+                return "missing"
+            elif not self.source_file_exists:
+                return "file missing"
+
+            return "error"
+
+        if self.exists():
+            return "done"
+        elif os.path.isfile(self.encoding_path()):
+            return "encoding"
+        elif os.path.isfile(self.wav_path()):
+            # Minor difference with the above, but differentiate on purpose.
+            return "encoding "
+        elif not self.busy():
+            return "starting"
+
+        return "decoding"
