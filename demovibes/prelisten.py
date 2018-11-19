@@ -23,22 +23,23 @@ class Prelisten(object):
     except:  # Bare excepts not encouraged but we really want to catch all!
         pass
 
-    def __init__(self, file_path):
+    def __init__(self, file_path, filename_prefix=''):
         self.file_path = file_path
+        self.filename_prefix = filename_prefix
+        self.source_file_exists = (not not self.file_path) \
+            and os.path.isfile(self.file_path)
         self.is_valid = (Prelisten.root_dir_exists
                          and Prelisten.has_encoder
-                         and (not not self.file_path)
-                         and os.path.isfile(self.file_path))
+                         and self.source_file_exists)
 
     def valid(self):
         return self.is_valid
 
     def busy(self):
-        return os.path.isfile(self.flag_path())
+        return os.path.isfile(self.encoding_path())
 
     def hash(self):
-        hash_object = hashlib.md5(self.file_path)
-        return hash_object.hexdigest()
+        return self.filename_prefix + hashlib.md5(self.file_path).hexdigest()
 
     def url(self):
         return os.path.join('/' + Prelisten.REL_URL, self.hash() + '.mp3')
@@ -46,8 +47,11 @@ class Prelisten(object):
     def path(self, extension='.mp3'):
         return os.path.join(Prelisten.dir, self.hash() + extension)
 
-    def flag_path(self):
+    def encoding_path(self):
         return self.path('.enc')
+
+    def wav_path(self):
+        return self.path('.wav')
 
     def exists(self):
         if not self.valid():
@@ -71,23 +75,23 @@ class Prelisten(object):
         # Prelisten files will be stored in a prelisten dir; we can use a
         # cron job to periodically purge it.
 
-        # Check if the prelisten file already exists...
-        if self.exists():
-            return True
-
-        # ... or is in progress.
+        # Check if the prelisten file is in progress...
         if self.busy():
             return False
 
+        # ... or already exists.
+        if self.exists():
+            return True
+
         unused_filename, file_ext = os.path.splitext(self.file_path)
         # If the file is already an mp3, make a symlink instead.
-        if file_ext == '.mp3':
+        if file_ext in ['.mp3', '.MP3']:
             os.symlink(self.file_path, self.path())
             return True
 
         # Otherwise first create a 'flag' file that says encoding is in
-        # progress...
-        open(self.flag_path(), 'a').close()
+        # progress (this file is also used to encode the MP3 to)...
+        open(self.encoding_path(), 'a').close()
 
         # ... and use dscan and LAME to create a prelistening file in a thread.
         thread.start_new_thread(self.do_create, ())
@@ -96,7 +100,7 @@ class Prelisten(object):
     def do_create(self):
         dscan = getattr(settings, 'DEMOSAUCE_SCAN', False)
         lame = getattr(settings, 'LAME', "/usr/bin/lame")
-        wav_path = self.path('.wav')
+        wav_path = self.wav_path()
 
         ret = subprocess.call([dscan, "-o", wav_path, self.file_path])
         if ret != 0:
@@ -104,18 +108,43 @@ class Prelisten(object):
                       % (self.file_path, wav_path, "some reason"))
             return
 
-        mp3_path = self.path()
+        encoding_path = self.encoding_path()
         ret = subprocess.call([lame, '-S', '--preset', 'standard',
-                               wav_path, mp3_path])
+                               wav_path, encoding_path])
+
+        ok = (ret == 0)
+        mp3_path = self.path()
+
+        if ok:
+            os.rename(encoding_path, mp3_path)
 
         os.unlink(wav_path)
 
-        if ret != 0:
-            log.debug("Could not lame %s to %s: %s"
-                      % (wav_path, mp3_path, "some reason"))
-            return
+        if ok:
+            log.debug("Created prelisten file for %s at %s."
+                      % (self.file_path, mp3_path))
+        else:
+            log.debug("Could not LAME %s to %s: %s"
+                      % (wav_path, encoding_path, "some reason"))
 
-        os.unlink(self.flag_path())
+    def status(self):
+        if not self.valid():
+            if not Prelisten.root_dir_exists:
+                return "prelisten dir missing"
+            elif not Prelisten.has_encoder:
+                return "encoder missing"
+            elif not self.file_path:
+                return "missing"
+            elif not self.source_file_exists:
+                return "file missing"
 
-        log.debug("Created prelisten file for %s at %s."
-                  % (self.file_path, mp3_path))
+            return "error"
+
+        if self.exists():
+            return "done"
+        elif os.path.isfile(self.wav_path()):
+            return "encoding"
+        elif not self.busy():
+            return "starting"
+
+        return "decoding"

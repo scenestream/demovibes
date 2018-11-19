@@ -1186,7 +1186,7 @@ class Song(models.Model):
 
     def prelisten(self):
         if self.file:
-            return prelisten.Prelisten(self.file.path)
+            return prelisten.Prelisten(self.file.path, 'song_%s_' % self.id)
         else:
             return prelisten.Prelisten('')
 
