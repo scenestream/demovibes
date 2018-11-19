@@ -51,7 +51,7 @@ class Prelisten(object):
         return self.path('.enc')
 
     def encoding_path(self):
-        return self.path() + '.encoding'
+        return self.flag_path()
 
     def wav_path(self):
         return self.path('.wav')
@@ -120,7 +120,6 @@ class Prelisten(object):
 
         if ok:
             os.rename(encoding_path, mp3_path)
-            os.unlink(self.flag_path())
 
         os.unlink(wav_path)
 
@@ -146,11 +145,8 @@ class Prelisten(object):
 
         if self.exists():
             return "done"
-        elif os.path.isfile(self.encoding_path()):
-            return "encoding"
         elif os.path.isfile(self.wav_path()):
-            # Minor difference with the above, but differentiate on purpose.
-            return "encoding "
+            return "encoding"
         elif not self.busy():
             return "starting"
 
