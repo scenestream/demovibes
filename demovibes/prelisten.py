@@ -36,7 +36,7 @@ class Prelisten(object):
         return self.is_valid
 
     def busy(self):
-        return os.path.isfile(self.flag_path())
+        return os.path.isfile(self.encoding_path())
 
     def hash(self):
         return self.filename_prefix + hashlib.md5(self.file_path).hexdigest()
@@ -47,11 +47,8 @@ class Prelisten(object):
     def path(self, extension='.mp3'):
         return os.path.join(Prelisten.dir, self.hash() + extension)
 
-    def flag_path(self):
-        return self.path('.enc')
-
     def encoding_path(self):
-        return self.flag_path()
+        return self.path('.enc')
 
     def wav_path(self):
         return self.path('.wav')
@@ -93,8 +90,8 @@ class Prelisten(object):
             return True
 
         # Otherwise first create a 'flag' file that says encoding is in
-        # progress...
-        open(self.flag_path(), 'a').close()
+        # progress (this file is also used to encode the MP3 to)...
+        open(self.encoding_path(), 'a').close()
 
         # ... and use dscan and LAME to create a prelistening file in a thread.
         thread.start_new_thread(self.do_create, ())
