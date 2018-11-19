@@ -128,7 +128,7 @@ class Prelisten(object):
             log.debug("Created prelisten file for %s at %s."
                       % (self.file_path, mp3_path))
         else:
-            log.debug("Could not lame %s to %s: %s"
+            log.debug("Could not LAME %s to %s: %s"
                       % (wav_path, encoding_path, "some reason"))
 
     def status(self):
