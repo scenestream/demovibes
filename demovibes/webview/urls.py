@@ -222,7 +222,7 @@ urlpatterns = patterns('',
 
 )
 
-if site_supports_song_file_replacements():
+if site_supports_song_file_replacements_by_user():
     urlpatterns += \
         patterns('',
                  url(r'^song/(?P<song_id>\d+)/upload/$',

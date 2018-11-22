@@ -919,6 +919,12 @@ def site_supports_song_file_replacements():
     return db_table_has_column('webview_songmetadata', 'file')
 
 
+# Replacements by user allowed?
+def site_supports_song_file_replacements_by_user():
+    # return site_supports_song_file_replacements()
+    return False
+
+
 class SongMetaData(models.Model):
     user = models.ForeignKey(User, blank = True, null = True)
     added = models.DateTimeField(auto_now_add=True)
@@ -1274,7 +1280,8 @@ class Song(models.Model):
         Only returns True if users are allowed to replace song files and if
         a song needs replacing.
         """
-        return site_supports_song_file_replacements() and self.needs_replacing()
+        return site_supports_song_file_replacements_by_user() \
+               and self.needs_replacing()
 
     class Meta:
         ordering = ['title']

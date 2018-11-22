@@ -65,7 +65,7 @@ class MetadataUploadForm(_UploadFormBase):
     class Meta:
         model = M.SongMetaData
         fields = []
-        if M.site_supports_song_file_replacements():
+        if M.site_supports_song_file_replacements_by_user():
             fields.append('file')
 
     def __init__(self, *args, **kwargs):
