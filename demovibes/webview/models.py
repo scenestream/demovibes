@@ -1014,7 +1014,8 @@ class SongMetaData(models.Model):
         return self.file != None
 
     def prelisten(self):
-        return prelisten.Prelisten(self.file.path)
+        return prelisten.Prelisten(self.file.path,
+                                   'repl_%s_%s_' % (self.song.id, self.id,))
 
     def save(self, *args, **kwargs):
         
