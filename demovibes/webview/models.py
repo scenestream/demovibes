@@ -1252,6 +1252,11 @@ class Song(models.Model):
         full_status = self.status_dict[self.status]
 
         if not self.can_be_replaced():
+            if hasattr(self, 'legacy_flag'):
+                if self.status == 'N' and self.legacy_flag == 'R':
+                    full_status = self.status_dict['A']
+                elif self.status == 'K' and not self.file:
+                    full_status = "Missing"
             return full_status
 
         if hasattr(self, 'legacy_flag'):
