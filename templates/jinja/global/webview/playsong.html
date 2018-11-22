@@ -2,7 +2,7 @@
 <html>
 <head><title>{{ song }} {{ gettext("playing") }}</title>
 	{% if not song.prelisten().generate() %}
-	<meta http-equiv="refresh" content="10">
+	<meta http-equiv="refresh" content="20">
 	{% endif %}
 </head>
 <body>
@@ -13,7 +13,7 @@
 	<source src="{{ song.prelisten().url() }}"/>
 </audio>
 {% else %}
-<p>Generating audio for prelistening ({{ song.prelisten().status() }})... Refreshing after 10 seconds.</p>
+<p>Generating audio for prelistening ({{ song.prelisten().status() }})... Refreshing after 20 seconds.</p>
 {% endif %}
 <a href="{{ songurl }}">Download song</a>
 {% if limit != None %}<p>This song link will only be valid for <b>60</b> seconds after this window was opened.</p>{% endif %}
