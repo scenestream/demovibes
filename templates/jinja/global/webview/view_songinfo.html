@@ -46,7 +46,7 @@
                         <source src="{{ meta.song.prelisten().url() }}"/>
                     </audio>
                 {% else %}
-                    <p>Generating audio for prelistening ({{ meta.song.prelisten().status() }})... Please refresh soon.</p>
+                    <p>Generating audio for prelistening ({{ meta.song.prelisten().status() }})... Please refresh later.</p>
                 {% endif %}
             {% else %}
                 Missing
@@ -58,7 +58,7 @@
                     <source src="{{ meta.prelisten().url() }}"/>
                   </audio>
           {% else %}
-                <p>Generating audio for prelistening ({{ meta.prelisten().status() }})... Please refresh soon.</p>
+                <p>Generating audio for prelistening ({{ meta.prelisten().status() }})... Please refresh later.</p>
           {% endif %}
         </td>
     </tr>
