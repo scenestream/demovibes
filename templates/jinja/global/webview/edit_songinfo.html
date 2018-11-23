@@ -8,8 +8,9 @@
 
 <p>{{ gettext("The information here will be submitted, but won't be active until a moderator has checked and approved it.") }}</p>
 
-<form method="post" action=".">
+<form action="." method="post" enctype="multipart/form-data">
 <table>
+    {% if upload_form %}{{ upload_form.as_table() }}{% endif %}
     {{ form.as_table() }}
 </table>
 <input type="submit" value="{{ gettext("Submit data") }}">

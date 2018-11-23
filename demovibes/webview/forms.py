@@ -1,6 +1,8 @@
 from webview import models as M
 from django import forms
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
+
 from PIL import Image
 #import mimetypes
 import dscan
@@ -17,11 +19,8 @@ class OnelinerHistory(forms.Form):
     start = forms.IntegerField(min_value=0, max_value=200,initial=0)
     results = forms.IntegerField(min_value=10, max_value=100,initial=10)
 
-class UploadForm(forms.ModelForm):
-    class Meta:
-        model = M.Song
-        fields = ["file", "title"]
 
+class _UploadFormBase(forms.ModelForm):
     def clean_file(self):
         data = self.cleaned_data['file']
 
@@ -50,10 +49,51 @@ class UploadForm(forms.ModelForm):
 
         return data
 
+
+class UploadForm(_UploadFormBase):
+    class Meta:
+        model = M.Song
+        fields = ["file", "title"]
+
+
 class SongMetadataForm(forms.ModelForm):
     class Meta:
         fields = ["release_year", "remix_of_id", "groups", "labels", "info", "type", "platform", "pouetid", "ytvidid", "ytvidoffset"]
         model = M.SongMetaData
+
+class MetadataUploadForm(_UploadFormBase):
+    class Meta:
+        model = M.SongMetaData
+        fields = []
+        if M.site_supports_song_file_replacements_by_user():
+            fields.append('file')
+
+    def __init__(self, *args, **kwargs):
+        file_is_required = kwargs.pop('file_is_required', False)
+        super(MetadataUploadForm, self).__init__(*args, **kwargs)
+
+        # Don't pass an instance of meta the first time: it makes the file
+        # field pre-filled and clearable, while we wan't it to appear empty
+        # and optionally be required.
+        if not 'file' in args:
+            assert not 'instance' in args, "Don't pass instance with initial non-POST ctor"
+
+        field = 'file'
+        if file_is_required and field in self.fields:
+            self.fields[field].required = True
+
+            # Change the label the first time only (when not POSTing yet).
+            # It appears harmless to change during POST but is useless anyway
+            # so just don't do it.
+            if not args:
+                self.fields[field].label = _('Replacement File')
+
+
+class MetadataCommentForm(forms.ModelForm):
+    class Meta:
+        model = M.SongMetaData
+        fields = ['comment']
+
 
 class EditSongMetadataForm(forms.ModelForm):
     class Meta:

@@ -31,6 +31,38 @@
         <th>{{ gettext("Changed fields") }}</th>
         <td>{{ meta.get_changelist()|join(", ") }}</td>
     </tr>
+    {% if 'file' in meta.get_changelist() %}
+    <tr>
+        <th></th>
+        <th>{{ gettext("Original") }}:</th>
+        <th>{{ gettext("Replacement") }}:</th>
+    </tr>
+    <tr>
+        <th>{{ gettext("Prelisten") }}:</th>
+        <td>
+            {% if meta.song.file %}
+                {% if meta.song.prelisten().generate() %}
+                    <audio controls>
+                        <source src="{{ meta.song.prelisten().url() }}"/>
+                    </audio>
+                {% else %}
+                    <p>Generating audio for prelistening ({{ meta.song.prelisten().status() }})... Please refresh later.</p>
+                {% endif %}
+            {% else %}
+                Missing
+            {% endif %}
+        </td>
+        <td>
+            {% if meta.prelisten().generate() %}
+                <audio controls>
+                    <source src="{{ meta.prelisten().url() }}"/>
+                  </audio>
+          {% else %}
+                <p>Generating audio for prelistening ({{ meta.prelisten().status() }})... Please refresh later.</p>
+          {% endif %}
+        </td>
+    </tr>
+    {% endif %}
 </table>
 
 <h2><img class="icon_header" src="{{ STATIC_URL }}sound.png" alt="" />{{ gettext("Song Information") }}</h2>

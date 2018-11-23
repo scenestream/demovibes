@@ -162,6 +162,7 @@ class PlaySong(SongView):
         return self.song.downloadable_by(self.request.user)
 
     def set_context(self):
+        self.song.prelisten().generate()  # this may be the wrong place, but not sure where to put it
         limit, total = m.protected_downloads.get_current_download_limits_for(self.request.user)
         self.song.log(self.request.user, "Song preview / download")
         return {'song': self.song, 'limit': limit, 'total': total}
@@ -864,6 +865,8 @@ def view_songinfo(request, songinfo_id):
             meta.checked = True
             meta.song.log(request.user, "Rejected metadata %s" % meta.id)
             meta.save()
+            if meta.is_file_change():
+                meta.song.touch()
     c = {'meta': meta }
     return j2shim.r2r("webview/view_songinfo.html", c, request)
 
@@ -889,10 +892,12 @@ class editSonginfo(SongView):
 @login_required
 def edit_songinfo(request, song_id):
     song = get_object_or_404(m.Song, id=song_id)
+    replaceable = song.can_be_replaced() and not song.has_pending_file_approval()
     meta = song.get_metadata()
     meta.comment = ""
 
     form2 = False
+    upload_form = None
     if (request.user.get_profile().have_artist() and request.user.artist in meta.artists.all()) or (request.user.is_staff):
         form2 = f.SongLicenseForm(instance=song)
 
@@ -905,15 +910,80 @@ def edit_songinfo(request, song_id):
                 song.log(request.user, "Changed song license to %s" % s.license)
                 return redirect(song)
         else:
+            if replaceable:
+                upload_form = f.MetadataUploadForm(request.POST, request.FILES, instance=meta)
             form = f.EditSongMetadataForm(request.POST, instance=meta)
-            if form.is_valid():
+            if form.is_valid() and (not upload_form or upload_form.is_valid()):
+                if upload_form:
+                    upload_form.save()
+                    if 'file' in request.FILES:
+                        meta.prelisten().generate()
+                        song.touch()
+
                 form.save()
                 return redirect(song)
     else:
+        if replaceable:
+            upload_form = f.MetadataUploadForm()
         form = f.EditSongMetadataForm(instance=meta)
 
-    c = {'form': form, 'song': song, 'form2': form2}
+    # c = {'form': form, 'song': song, 'form2': form2}
+    c = {'form': form, 'song': song, 'form2': form2, 'upload_form': upload_form}
     return j2shim.r2r("webview/edit_songinfo.html", c, request)
+
+@login_required
+def upload_song_file(request, song_id):
+    song = get_object_or_404(m.Song, id=song_id)
+
+    upload_form = comment_form = None
+
+    def update_many_to_many(new_row, ori_row, forms):
+        from django.db.models.fields.related import ManyToManyField
+
+        modifiable_fields = []
+        for form in forms:
+            modifiable_fields.append(form.fields.keys())
+
+        meta = new_row._meta
+        for field in meta.get_all_field_names():
+            if field not in modifiable_fields \
+               and isinstance(meta.get_field(field), ManyToManyField):
+                getattr(new_row, field).add(*getattr(ori_row, field).all())
+
+    if song.can_be_replaced() and not song.has_pending_file_approval():
+        if request.method == "POST":
+            ori_meta = song.get_metadata()
+            from copy import deepcopy
+            meta = deepcopy(ori_meta)
+            meta.pk = None
+            meta.user = request.user
+            meta.checked = False
+            meta.active = False
+            meta.file = ''
+            meta.comment = ""
+
+            file_is_required = not request.POST.get('comment', '')
+            upload_form = f.MetadataUploadForm(request.POST, request.FILES,
+                                               instance=meta,
+                                               file_is_required=file_is_required)
+            comment_form = f.MetadataCommentForm(request.POST, instance=meta)
+
+            if upload_form.is_valid() and comment_form.is_valid():
+                # First must save, then can copy artists, groups, ...
+                meta.save()
+                update_many_to_many(meta, ori_meta, [upload_form, comment_form])
+
+                meta.prelisten().generate()
+                song.touch()
+
+                return redirect(song)
+        else:
+            upload_form = f.MetadataUploadForm(file_is_required=True)
+            comment_form = f.MetadataCommentForm()
+
+    c = {'upload_form': upload_form, 'comment_form': comment_form, 'song': song}
+    return j2shim.r2r("webview/upload_song_file.html", c, request)
+
 
 @login_required
 def upload_song(request, artist_id):
@@ -974,7 +1044,8 @@ def upload_song(request, artist_id):
                     # Should throw when the song isn't found in the DB
                     Q = m.SongApprovals(song = new_song, approved_by=request.user, uploaded_by=request.user)
                     Q.save()
-
+            else:  # unapproved song; generate prelisten file
+                new_song.prelisten().generate()
             return HttpResponseRedirect(new_song.get_absolute_url())
     else:
         form = f.UploadForm()
@@ -982,6 +1053,7 @@ def upload_song(request, artist_id):
     return j2shim.r2r('webview/upload.html', \
         {'form' : form, 'infoform': infoform, 'artist' : artist, 'links': links }, \
         request=request)
+
 
 @permission_required('webview.change_song')
 def activate_upload(request):

@@ -221,3 +221,10 @@ urlpatterns = patterns('',
     url(r'^status/cache/$',                    'demovibes.webview.views.memcached_status', name = "dv-memcached"), # Show memcached status
 
 )
+
+if site_supports_song_file_replacements_by_user():
+    urlpatterns += \
+        patterns('',
+                 url(r'^song/(?P<song_id>\d+)/upload/$',
+                     'demovibes.webview.views.upload_song_file',
+                     name='dv-replace-song-file'), )

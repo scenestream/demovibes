@@ -12,6 +12,8 @@ from django.core.mail import EmailMessage
 #from django.core.urlresolvers import reverse
 import dscan
 import logging
+import prelisten
+
 import xml.dom.minidom, urllib # Needed for XML processing
 from django.core.cache import cache
 from django.template.defaultfilters import striptags
@@ -865,6 +867,64 @@ class ScreenshotObjectLink(models.Model):
     class Meta:
         unique_together = ["content_type", "object_id", "image"]
 
+
+def get_song_filename_prefix(song_id):
+    return '{0}_'.format(song_id)
+
+
+def to_prefixed_song_filename(song_id, ori_filename):
+    if ori_filename.startswith(get_song_filename_prefix(song_id)):
+        return ori_filename
+
+    return '{id}_{name}'.format(id=song_id, name=ori_filename)
+
+
+def to_original_song_filename(song_id, filename):
+    prefix = get_song_filename_prefix(song_id)
+    if filename.startswith(prefix):
+        return filename[len(prefix):]
+
+    return filename
+
+
+def create_song_replacement_path(instance, filename):
+    song_id = instance.song_id
+    final_filename = to_prefixed_song_filename(song_id, filename)
+
+    def get_dir_bucket(id_, max_files_per_dir):
+        nearest_dir = id_ - (id_ % max_files_per_dir)
+        max_dir_name_length = len(str(max_files_per_dir * max_files_per_dir))
+        return str(nearest_dir).zfill(max_dir_name_length)
+
+    return os.path.join('media', 'music', 'replacements', 'user',
+                        get_dir_bucket(song_id, max_files_per_dir=256),
+                        final_filename)
+
+
+def db_table_has_column(table, column):
+    from django.db import connection
+    cursor = connection.cursor()
+    cursor.execute("""
+SELECT * FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = 'demovibes'
+    AND TABLE_NAME = '{0}'
+    AND COLUMN_NAME = '{1}'""".format(table, column))
+
+    return cursor.fetchone() is not None
+
+
+def site_supports_song_file_replacements():
+    # If file column will be available permanently then this should become
+    # a site setting.
+    return db_table_has_column('webview_songmetadata', 'file')
+
+
+# Replacements by user allowed?
+def site_supports_song_file_replacements_by_user():
+    # return site_supports_song_file_replacements()
+    return False
+
+
 class SongMetaData(models.Model):
     user = models.ForeignKey(User, blank = True, null = True)
     added = models.DateTimeField(auto_now_add=True)
@@ -873,6 +933,8 @@ class SongMetaData(models.Model):
     checked = models.BooleanField(default=False, db_index = True)
 
     artists = models.ManyToManyField(Artist, null = True, blank = True, help_text="Select all artists involved with creating this song. ")
+    if site_supports_song_file_replacements():
+        file = models.FileField(null=True, blank=True, upload_to=create_song_replacement_path, verbose_name="Optional Replacement File", max_length=200, help_text="Select a module (MOD, XM, etc...) or audio file (MP3, OGG, etc...) to upload. See <a href='../../../faq/'>FAQ</a> for details.<br><b>Note:</b>If the file is online, fill in the URL as a Comment instead.")
     groups = models.ManyToManyField(Group, null = True, blank = True)
     info = models.TextField(blank = True, help_text="Additional Song information. BBCode tags are supported. No HTML.")
     labels = models.ManyToManyField(Label, null = True, blank = True) # Production labels
@@ -900,11 +962,17 @@ class SongMetaData(models.Model):
         if self.active:
             return []
         fields = ["artists", "groups", "labels", "info", "platform", "release_year", "type", "remix_of_id", "ytvidid", "ytvidoffset", "pouetid"]
+        if site_supports_song_file_replacements():
+            fields.insert(1, 'file')
         mfields = ["artists", "groups", "labels"]
         meta = self.song.get_metadata()
         result = []
         for f in fields:
             me = getattr(self, f)
+            if f == 'file' and not me:
+                # Consider an empty file as unchanged
+                continue
+
             old = getattr(meta, f)
             if f in mfields:
                 if list(set(me.all()) ^ set(old.all())):
@@ -922,8 +990,54 @@ class SongMetaData(models.Model):
         self.active = True
         self.checked = True
         self.save()
+
+        if self.file and self.song.needs_replacing():
+
+            # Only change the status to Active if the song just requires a
+            # file to be playable
+            if self.song.status in ['K', 'N']:
+                self.song.status = 'A'
+            if hasattr(self.song, 'legacy_flag'):
+                self.song.legacy_flag = ' '
+
+            self.song.file = self.file
+            # Must unset loopfade_time here:
+            # If it's already set but not required for the new file then
+            # loopfade_time doesn't get set to 0 as part of the scan process.
+            self.song.loopfade_time = 0
+
+            try:
+                self.song.set_song_data()
+            except:
+                self.song.status = 'K'
+            if not self.song.song_length:
+                self.song.status = 'K'
         self.song.reset_pouetinfo()
         self.song.save() #For cache updates
+
+    def is_file_change(self):
+        # NOTE: Don't compare with "is not None", it will always be True!
+        return self.file != None
+
+    def prelisten(self):
+        return prelisten.Prelisten(self.file.path,
+                                   'repl_%s_%s_' % (self.song.id, self.id,))
+
+    def save(self, *args, **kwargs):
+        
+        set_file_to_none = not self.is_file_change()
+
+        result = super(SongMetaData, self).save(*args, **kwargs)
+
+        if set_file_to_none:
+            # Before 'file' was set to None which means it didn't come from
+            # Replace Song file form but Edit Information. Django changes
+            # file to '' (see https://code.djangoproject.com/ticket/25528 for
+            # a failing test case) during save. Restore it to NULL using an
+            # update().
+            SongMetaData.objects.filter(id=self.id).update(file=None)
+
+        return result
 
 class ObjectLog(models.Model):
     content_type = models.ForeignKey(ContentType)
@@ -954,18 +1068,8 @@ def createSongPath(instance, filename):
         return "%s/%s/%s/%s" % (base, firstchar, secchar, filename)
     return "%s/shortname/%s" % (base, filename)
 
-
 def has_legacy_flag():
-    from django.db import connection
-    cursor = connection.cursor()
-    cursor.execute("""
-SELECT * FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = 'demovibes'
-    AND TABLE_NAME = 'webview_song'
-    AND COLUMN_NAME = 'legacy_flag'""")
-
-    return cursor.fetchone() is not None
-
+    return db_table_has_column('webview_song', 'legacy_flag')
 
 class Song(models.Model):
     STATUS_CHOICES = (
@@ -984,6 +1088,7 @@ class Song(models.Model):
             ('R', 'Rejected'),
             ('K', 'Kaput') # file doesn't exist or scanner didn't like the song
         )
+    status_dict = {k[0]: k[1] for k in STATUS_CHOICES}
     LEGACY_FLAG = (
             (' ', 'N/A'), # Is not a legacy tune (new upload since Jul. 2018, or replaced streamrip)
             ('R', 'Recovered'), # is a recovered stream rip (not original, needs replacement)
@@ -1086,6 +1191,12 @@ class Song(models.Model):
            return protected_downloads.get_song_url(self, user)
         return False
 
+    def prelisten(self):
+        if self.file:
+            return prelisten.Prelisten(self.file.path, 'song_%s_' % self.id)
+        else:
+            return prelisten.Prelisten('')
+
     def has_video(self):
         return self.get_metadata().ytvidid
 
@@ -1111,7 +1222,7 @@ class Song(models.Model):
         """
         Check if song is considered active.
         """
-        return Song.status_is_requestable(self.status) and self.file is not None
+        return Song.status_is_requestable(self.status) and self.file
 
     @staticmethod
     def status_is_requestable(status):
@@ -1120,6 +1231,62 @@ class Song(models.Model):
     @staticmethod
     def status_requires_file(status):
         return Song.status_is_requestable(status) or status == 'J'
+
+    def has_pending_file_approval(self):
+        # if not self.can_be_replaced():
+        #     return False
+
+        # Exclude file=None which are metadata (edits) with no file set.
+        # This ensures only metadata objects involving file changes are
+        # considering for pending, and not 'ordinary' edits.
+        return SongMetaData.objects.filter(song_id=self.id,
+            checked=False, active=False).exclude(file=None).count() > 0
+
+    def get_status_display(self):
+        """
+        Overrides/Behaves the same as django-generated Song.get_status_display.
+
+        If song files can be replaced and this song needs replacing then a link
+        to edit songs is used.
+        """
+        full_status = self.status_dict[self.status]
+
+        if not self.can_be_replaced():
+            if hasattr(self, 'legacy_flag'):
+                if self.status == 'N' and self.legacy_flag == 'R':
+                    full_status = self.status_dict['A']
+                elif self.status == 'K' and not self.file:
+                    full_status = "Missing"
+            return full_status
+
+        if hasattr(self, 'legacy_flag'):
+            if self.status == 'N' and self.legacy_flag == 'R':
+                full_status = "Recovered"
+            elif self.status == 'K' and not self.file:
+                full_status = "Missing"
+
+        if self.has_pending_file_approval():
+            return '{0} *'.format(full_status)
+
+        return '{0} <a class="replace-song-link" href="{1}">*</a>'.format(full_status, self.get_absolute_url() + 'upload/')
+
+    def needs_replacing(self):
+        """
+        Check if song needs replacing.
+        """
+
+        return self.status in ['K', 'N'] or not self.file \
+               or (hasattr(self, 'legacy_flag') and self.legacy_flag != ' ')
+
+    def can_be_replaced(self):
+        """
+        Check if song can be replaced.
+
+        Only returns True if users are allowed to replace song files and if
+        a song needs replacing.
+        """
+        return site_supports_song_file_replacements_by_user() \
+               and self.needs_replacing()
 
     class Meta:
         ordering = ['title']
@@ -1361,6 +1528,12 @@ class Song(models.Model):
         self.startswith = S
         return super(Song, self).save(*args, **kwargs)
 
+    def touch(self):
+        """
+        Invalidate site cache fragments that key on a song's last_changed
+        """
+        Song.objects.filter(id=self.id).update(
+            last_changed=datetime.datetime.now())
 
     def artist(self):
         """
