@@ -56,7 +56,8 @@
             {% if meta.prelisten().generate() %}
                 <audio controls  style="width: 100%;">
                     <source src="{{ meta.prelisten().url() }}"/>
-                  </audio>
+                </audio>
+                <br>Filename: {{ meta.file.path.split('/')[-1] }}
           {% else %}
                 <p>Generating audio for prelistening ({{ meta.prelisten().status() }})... Please refresh later.</p>
           {% endif %}
