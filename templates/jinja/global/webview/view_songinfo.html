@@ -6,7 +6,7 @@
 
 {% block main %}
 <h2><img class="icon_header" src="{{ STATIC_URL }}tick.png" alt="" />{{ gettext("Correction Status") }}</h2>
-<table>
+<table style="width: 100%;">
     <tr>
         <th>{{ gettext("Song") }}</th>
         <td>{{ display.song(meta.song) }}</td>
@@ -54,9 +54,10 @@
         </td>
         <td>
             {% if meta.prelisten().generate() %}
-                <audio controls>
+                <audio controls  style="width: 100%;">
                     <source src="{{ meta.prelisten().url() }}"/>
-                  </audio>
+                </audio>
+                <br>Filename: {{ meta.file.path.split('/')[-1] }}
           {% else %}
                 <p>Generating audio for prelistening ({{ meta.prelisten().status() }})... Please refresh later.</p>
           {% endif %}
