@@ -24,7 +24,7 @@ class Prelisten(object):
         pass
 
     def __init__(self, file_path, filename_prefix=''):
-        self.file_path = file_path
+        self.file_path = file_path.encode('utf8')
         self.filename_prefix = filename_prefix
         self.source_file_exists = (not not self.file_path) \
             and os.path.isfile(self.file_path)
