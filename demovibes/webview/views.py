@@ -973,7 +973,8 @@ def upload_song_file(request, song_id):
                 meta.save()
                 update_many_to_many(meta, ori_meta, [upload_form, comment_form])
 
-                meta.prelisten().generate()
+                if 'file' in request.FILES:
+                    meta.prelisten().generate()
                 song.touch()
 
                 return redirect(song)
