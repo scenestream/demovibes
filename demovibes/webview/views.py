@@ -1,6 +1,7 @@
 from webview import models as m
 from webview import forms as f
 from webview import common
+from models import site_supports_song_file_replacements
 from django.utils.html import escape
 from openid_provider.models import TrustedRoot
 
@@ -1186,6 +1187,17 @@ class songStatistics(WebView):
     def list_leastvotes(self):
         return self.get_songs().exclude(locked_until__gte=datetime.datetime.now()).order_by('rating_votes', '?')[:100]
 
+    def list_user_uploads(self, status):
+        return (m.Song.objects.filter(status=status,
+                uploader_id=self.request.user.id).order_by('-rating_total')
+        )
+
+    def list_missing_user_uploads(self):
+        return self.list_user_uploads('K')
+
+    def list_recovered_user_uploads(self):
+        return self.list_user_uploads('N')
+
     def list_random(self):
         max_id = m.Song.objects.order_by('-id')[0].id
         max_songs = self.get_songs().count()
@@ -1224,6 +1236,11 @@ class songStatistics(WebView):
             'unplayed': ("The least played songs in the database.", "times_played", "# Played", self.list_queued2),
             'mostvotes': ("Songs with the highest number of votes cast.", "rating_votes", "# Votes", self.list_mostvotes),
         }
+
+        if site_supports_song_file_replacements() and self.request.user.is_authenticated():
+            self.stats['My_missing_uploads'] = ("Missing songs you uploaded that need replacing.", "rating_votes", "# Votes", self.list_missing_user_uploads, )
+            self.stats['My_recovered_uploads'] = ("Recovered songs you uploaded that need replacing.", "rating_votes", "# Votes", self.list_recovered_user_uploads, )
+
         self.stattype = self.kwargs.get("stattype", "")
 
     def set_context(self):
