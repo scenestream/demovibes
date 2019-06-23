@@ -1184,8 +1184,11 @@ class songStatistics(WebView):
     def list_voted(self):
         return self.get_songs().filter(rating_votes__gt=9).order_by('-rating')
 
-    def list_leastvotes(self):
-        return self.get_songs().exclude(locked_until__gte=datetime.datetime.now()).order_by('rating_votes', '?')[:100]
+    def list_leastvotes(self, exclude_status=None):
+        return self.get_songs().exclude(status=exclude_status).exclude(locked_until__gte=datetime.datetime.now()).order_by('rating_votes', '?')[:100]
+
+    def list_leastvotes_playable(self):
+        return self.list_leastvotes('K')
 
     def list_user_uploads(self, status):
         return (m.Song.objects.filter(status=status,
@@ -1220,32 +1223,51 @@ class songStatistics(WebView):
     def list_mostvotes(self):
         return self.get_songs().order_by('-rating_votes')
 
-    def list_queued2(self):
-        return self.get_songs().exclude(locked_until__gte=datetime.datetime.now()).order_by('times_played', 'locked_until')
+    def list_queued2(self, exclude_status=None):
+        return self.get_songs().exclude(status=exclude_status).exclude(locked_until__gte=datetime.datetime.now()).order_by('times_played', 'locked_until')
+
+    def list_queued2_playable(self):
+        return self.list_queued2('K')
 
     def list_queued(self):
         return self.get_songs().order_by('-times_played')
 
     def initialize(self):
-        self.stats = {
-            'random': ("Random songs from the database!", "rating_votes", "# Votes", self.list_random),
-            'leastvotes': ("Songs with the least number of votes in the database.", "rating_votes", "# Votes", self.list_leastvotes),
-            'favorites': ("Songs which appear on more users favourites lists.", "num_favorited", "# Favorited", self.list_favorites),
-            'voted': ("Songs with the highest ratings in the database.", "rating", "Rating", self.list_voted),
-            'queued': ("The most played songs in the database.", "times_played", "# Played", self.list_queued),
-            'unplayed': ("The least played songs in the database.", "times_played", "# Played", self.list_queued2),
-            'mostvotes': ("Songs with the highest number of votes cast.", "rating_votes", "# Votes", self.list_mostvotes),
-        }
+        lstats = [
+            ('random', "Random songs from the database!", "rating_votes", "# Votes", self.list_random),
+            ('least votes', "Songs with the least number of votes in the database.", "rating_votes", "# Votes", self.list_leastvotes),
+            ('least votes (playable only)', "Songs with the least number of votes in the database.", "rating_votes", "# Votes", self.list_leastvotes_playable),
+            ('unplayed', "The least played songs in the database.", "times_played", "# Played", self.list_queued2),
+            ('unplayed (playable only)', "The least played songs in the database.", "times_played", "# Played", self.list_queued2_playable),
+            ('favorites', "Songs which appear on more users favourites lists.", "num_favorited", "# Favorited", self.list_favorites),
+            ('voted', "Songs with the highest ratings in the database.", "rating", "Rating", self.list_voted),
+            ('queued', "The most played songs in the database.", "times_played", "# Played", self.list_queued),
+            ('most votes', "Songs with the highest number of votes cast.", "rating_votes", "# Votes", self.list_mostvotes),
+        ]
 
         if site_supports_song_file_replacements() and self.request.user.is_authenticated():
-            self.stats['My_missing_uploads'] = ("Missing songs you uploaded that need replacing.", "rating_votes", "# Votes", self.list_missing_user_uploads, )
-            self.stats['My_recovered_uploads'] = ("Recovered songs you uploaded that need replacing.", "rating_votes", "# Votes", self.list_recovered_user_uploads, )
+            lstats.append(('My missing uploads', "Missing songs you uploaded that need replacing.", "rating_votes", "# Votes", self.list_missing_user_uploads, ))
+            lstats.append(('My recovered uploads', "Recovered songs you uploaded that need replacing.", "rating_votes", "# Votes", self.list_recovered_user_uploads, ))
+
+        from collections import OrderedDict
+        self.stats = OrderedDict()
+        for x in lstats:
+            key = ''
+            for c in x[0]:
+                if c.isalnum():
+                    key += c
+                elif c == ' ':
+                    key += '_'
+
+            # key = x[0].replace(' ', '').replace('(', '').replace(')', '')
+            tup = x
+            self.stats[key] = tup
 
         self.stattype = self.kwargs.get("stattype", "")
 
     def set_context(self):
         if self.stattype in self.stats.keys():
-            title, stat, name, songs = self.stats[self.stattype]
+            caption, title, stat, name, songs = self.stats[self.stattype]
             return {'songs': songs()[:100], 'title': title, 'numsongs': 100, 'stat': stat, 'name': name}
         self.template = "stat_songs_index.html"
         return {'keys': self.stats}

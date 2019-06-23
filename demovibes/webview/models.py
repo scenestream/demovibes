@@ -478,6 +478,9 @@ class Userprofile(models.Model):
         """
         Check if a user is allowed to view this user's profile
         """
+        if self.is_muted():
+            return False
+
         if (self.visible_to == 'A') or ((self.visible_to == 'R') and (user.is_authenticated())):
             return True
         return False
@@ -1261,7 +1264,7 @@ class Song(models.Model):
 
         if hasattr(self, 'legacy_flag'):
             if self.status == 'N' and self.legacy_flag == 'R':
-                full_status = "Recovered"
+                full_status = self.status_dict['A']  # "Recovered"
             elif self.status == 'K' and not self.file:
                 full_status = "Missing"
 
@@ -1275,8 +1278,8 @@ class Song(models.Model):
         Check if song needs replacing.
         """
 
-        return self.status in ['K', 'N'] or not self.file \
-               or (hasattr(self, 'legacy_flag') and self.legacy_flag != ' ')
+        return self.status in ['K', 'N'] # or not self.file \
+               # or (hasattr(self, 'legacy_flag') and self.legacy_flag != ' ')
 
     def can_be_replaced(self):
         """

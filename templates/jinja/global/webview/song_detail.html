@@ -10,7 +10,10 @@
 
 <h2>
  <img class="icon_header" src="{{ STATIC_URL }}music.png" alt="" />{{ gettext("Song Information") }}
-{% if user.is_staff %}
+ {% if not user.is_staff and meta.active != 1 %}
+      <p>This tune was removed per artist's request</p>
+        {% else %}
+ {% if user.is_staff %}
  [<a href="/admin/webview/song/{{ object.id }}/">{{ gettext("Edit Info") }}</a>]
 {% endif %}
 {% if object.downloadable_by(user) %}
@@ -70,6 +73,7 @@ Author:
 {% if meta.release_year %}{{ gettext("Release Year") }}: {{ meta.release_year }}<br />{% endif %}
 {{ gettext("Song Status") }}: {{ object.get_status_display() }}
 {% if object.bitrate %}<br />{{ gettext("Song Bitrate") }}: {{ object.bitrate }} kbps{% endif %}
+{% if object.legacy_flag in ['M', 'R'] %}<br />{{ gettext("Song Legacy Flag")}}: {{ object.legacy_flag }}{% endif %}
 {% if meta.type %}<br />{{ gettext("Song Source") }}: {{ meta.type|e }}{% endif %}
 {% if meta.platform %}<br />{{ gettext("Song Platform") }}: {{ display.platform(meta.platform) }}{% endif %}
 {% if object.license %}<br />{{ gettext("Song License") }}: {{ display.songlicense(object) }}{% endif %}
@@ -207,6 +211,6 @@ Author:
   <input type="submit" value="Add New Comment" />
  </form>
 {% endif %}
-
+{% endif %}
 {% endblock %}
 

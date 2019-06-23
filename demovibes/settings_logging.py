@@ -1,6 +1,7 @@
 import os
 
-LOG_ROOT = os.path.dirname(os.path.realpath(__file__))
+#LOG_ROOT = os.path.dirname(os.path.realpath(__file__))
+LOG_ROOT = '/var/log/demovibes/'
 
 LOGGING = {
     'version': 1,
