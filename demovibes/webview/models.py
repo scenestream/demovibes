@@ -924,8 +924,8 @@ def site_supports_song_file_replacements():
 
 # Replacements by user allowed?
 def site_supports_song_file_replacements_by_user():
-    # return site_supports_song_file_replacements()
-    return False
+    return site_supports_song_file_replacements()
+    #return False
 
 
 class SongMetaData(models.Model):
@@ -937,7 +937,7 @@ class SongMetaData(models.Model):
 
     artists = models.ManyToManyField(Artist, null = True, blank = True, help_text="Select all artists involved with creating this song. ")
     if site_supports_song_file_replacements():
-        file = models.FileField(null=True, blank=True, upload_to=create_song_replacement_path, verbose_name="Optional Replacement File", max_length=200, help_text="Select a module (MOD, XM, etc...) or audio file (MP3, OGG, etc...) to upload. See <a href='../../../faq/'>FAQ</a> for details.<br><b>Note:</b>If the file is online, fill in the URL as a Comment instead.")
+        file = models.FileField(null=True, blank=True, upload_to=create_song_replacement_path, verbose_name="Optional Replacement File", max_length=200, help_text="Select a module (MOD, XM, etc...) or audio file (MP3, OGG, etc...) to upload. See <a href='../../../faq/'>FAQ</a> for details.<br><b>Note: Only use this for missing or broken tunes. You MUST indicate in the comment what your upload is fixing! (silence, bits of other tune/jingle spliced in, completely wrong content, etc)</b>.")
     groups = models.ManyToManyField(Group, null = True, blank = True)
     info = models.TextField(blank = True, help_text="Additional Song information. BBCode tags are supported. No HTML.")
     labels = models.ManyToManyField(Label, null = True, blank = True) # Production labels
@@ -1229,7 +1229,7 @@ class Song(models.Model):
 
     @staticmethod
     def status_is_requestable(status):
-        return status in ['A', 'N']
+        return status in ['A', 'N', 'E']
 
     @staticmethod
     def status_requires_file(status):
@@ -1277,9 +1277,7 @@ class Song(models.Model):
         """
         Check if song needs replacing.
         """
-
-        return self.status in ['K', 'N'] # or not self.file \
-               # or (hasattr(self, 'legacy_flag') and self.legacy_flag != ' ')
+        return self.status in ['K', 'E'] or (hasattr(self, 'legacy_flag') and self.legacy_flag == 'M')
 
     def can_be_replaced(self):
         """

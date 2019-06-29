@@ -952,6 +952,11 @@ def upload_song_file(request, song_id):
                 getattr(new_row, field).add(*getattr(ori_row, field).all())
 
     if song.can_be_replaced() and not song.has_pending_file_approval():
+        # user is attempting to upload a file replacement
+        yesterday = datetime.datetime.now() - datetime.timedelta(days=1)
+        # only file replacements have non-null 'file' field in the SongMetaData object 
+        replacements_today = m.SongMetaData.objects.filter(user_id=request.user.id,file__isnull=False,added__gte=yesterday).count()
+        over_quota = (replacements_today >= getattr(settings, 'MAX_REPLACEMENTS_PER_DAY', 3))
         if request.method == "POST":
             ori_meta = song.get_metadata()
             from copy import deepcopy
@@ -970,6 +975,14 @@ def upload_song_file(request, song_id):
             comment_form = f.MetadataCommentForm(request.POST, instance=meta)
 
             if upload_form.is_valid() and comment_form.is_valid():
+                if over_quota:
+                    request.user.get_profile().send_message_not_to_self(
+                        sender = m.User.objects.get(username="djrandom"), 
+                        message = "Your replacement for [song]%s[/song] was not accepted, as you have already submitted %s replacements in the last 24 hours. Please try again later." % (song.id, getattr(settings, 'MAX_REPLACEMENTS_PER_DAY', 3)),
+                        subject = "Maximum replacement submissions exceeded"
+                    )
+                    return redirect(song)
+                upload_form.save()
                 # First must save, then can copy artists, groups, ...
                 meta.save()
                 update_many_to_many(meta, ori_meta, [upload_form, comment_form])
@@ -980,6 +993,9 @@ def upload_song_file(request, song_id):
 
                 return redirect(song)
         else:
+            if over_quota:
+                m.send_notification("You have too many replacements pending; try again later.", request.user)
+                return redirect(song)
             upload_form = f.MetadataUploadForm(file_is_required=True)
             comment_form = f.MetadataCommentForm()
 

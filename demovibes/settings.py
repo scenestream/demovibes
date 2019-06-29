@@ -452,7 +452,8 @@ except:
 # but when I tested it I didn't see any
 # in django it looks like that: if content_length > settings.FILE_UPLOAD_MAX_MEMORY_SIZE
 FILE_UPLOAD_MAX_MEMORY_SIZE = -1
-
+# Maximum number of file replacements per day per user
+MAX_REPLACEMENTS_PER_DAY = 3
 try:
     from settings_local import *
 except:
