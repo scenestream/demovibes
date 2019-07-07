@@ -1277,7 +1277,7 @@ class Song(models.Model):
         """
         Check if song needs replacing.
         """
-        return self.status in ['K', 'E'] or (hasattr(self, 'legacy_flag') and self.legacy_flag == 'M')
+        return self.status in ['K', 'E'] or (self.status in ['I', 'K', 'B'] and hasattr(self, 'legacy_flag') and self.legacy_flag == 'M')
 
     def can_be_replaced(self):
         """
