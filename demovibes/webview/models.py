@@ -998,7 +998,7 @@ class SongMetaData(models.Model):
 
             # Only change the status to Active if the song just requires a
             # file to be playable
-            if self.song.status in ['K', 'N']:
+            if self.song.status in ['K', 'N', 'E']:
                 self.song.status = 'A'
             if hasattr(self.song, 'legacy_flag'):
                 self.song.legacy_flag = ' '
