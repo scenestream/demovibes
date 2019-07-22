@@ -2046,6 +2046,7 @@ class RadioStream(models.Model):
         ('O', 'Ogg'),
         ('A', 'AAC'),
         ('S', 'SHOUTcast'),
+        ('P', 'Opus')
     )
     streamtype = models.CharField(max_length=1, choices = STREAMS)
     active = models.BooleanField(default=True, db_index=True)
