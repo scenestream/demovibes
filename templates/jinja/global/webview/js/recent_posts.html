@@ -1,0 +1,17 @@
+<!-- queue                    -->
+{% set row_class = cycler('row1', 'row2') -%}
+{% if recent_posts %}
+<table class="songlist">
+ <tr>
+  <th>Song</th>
+  <th>Comment</th>
+  <th>Posted By</th>
+  <th>When</th>
+ </tr>
+ {% for post in recent_posts %}
+  {% include "webview/t/comment_post.html" %}
+ {% endfor %}
+</table>
+{% else %}
+	There are no recent posts to display, thanks to you. :(
+{% endif %}

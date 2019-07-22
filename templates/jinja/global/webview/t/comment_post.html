@@ -1,0 +1,15 @@
+{% import "macro/display.html" as display -%}
+<tr class="{{ row_class.next() }}">
+ <td>
+	 {{ display.song(post.song) }}
+ </td>
+ <td>
+	 {{ post.comment|mksafe|bbcode }}
+ </td>
+ <td>
+	 {{ display.user(post.user) }}
+ </td>
+ <td>
+	 {{ post.added|timesince }} ago
+ </td>
+</tr>

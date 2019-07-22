@@ -360,6 +360,17 @@ def get_queue(create_new=False):
         logger.debug("Cache generated")
     return R
 
+# implement get_recent_posts() analogous to the get_queue above
+def get_recent_posts(create_new=False):
+    key = "recent_posts"
+    R = cache.get(key)
+    if not R or create_new:
+        posts = models.SongComment.objects.all().order_by('-id')[:20]
+        R = j2shim.r2s("webview/js/recent_posts.html", { 'recent_posts' : posts })
+        cache.set(key, R, 300)
+    return R
+                
+
 def get_profile(user):
     """
     Get a user's profile.

@@ -340,6 +340,7 @@ class listQueue(WebView):
                 'now_playing': "",
                 'history': common.get_history(),
                 'queue': common.get_queue(),
+                'recent_posts' : common.get_recent_posts()
         }
 
 def list_song(request, song_id):
