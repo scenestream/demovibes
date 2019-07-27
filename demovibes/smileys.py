@@ -135,4 +135,6 @@ SMILEYS = (
 (':rockband:', 'emoticons/rockband.gif'),
 (':beer2:', 'emoticons/beer2.gif'),
 (':eyeroll:', 'emoticons/eyeroll.gif'),
+(':5*:', 'emoticons/5star.gif'),
+(':1*:', 'emoticons/1star.gif'),
 )
