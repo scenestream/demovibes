@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group as UserGroup
 import datetime
+#from datetime import datetime
 
 import re
 import os.path
@@ -1170,6 +1171,19 @@ class Song(models.Model):
             muhu = datetime.timedelta(seconds = int(vote.total_seconds() * num))
             log.debug("Vote penalty number is %s, and added time is: %s", num, muhu)
             time = time + muhu
+        # override lock time for new tunes. with a small fuzz factor of a portion of an hour
+        if self.added > datetime.datetime.now() - datetime.timedelta(days=28):
+            time = datetime.timedelta(hours = 24 * 3.5 + random.random())
+            log.debug("Song is fairly new; overriding lock time to: %s", time)
+        elif self.added > datetime.datetime.now() - datetime.timedelta(days=14):
+            time = datetime.timedelta(hours = 24 * 2.5 + random.random())
+            log.debug("Song is new; overriding lock time to: %s", time)
+        # xmas locktime thing
+        if datetime.datetime.now().month == 12:
+            for t in self.tags:
+                if t.name == "Christmas":
+                    time = datetime.timedelta(hours = 14)
+                    log.debug("Song is an xmas song; overriding lock time to: %s", time)
         log.debug("Lock time calculated to: %s", time)
         return time
 
