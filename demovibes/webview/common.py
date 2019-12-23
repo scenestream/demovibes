@@ -212,6 +212,7 @@ def queue_song(song, user, event = True, force = False):
     Q = False
     time = song.create_lock_time()
     result = True
+    long_tune_length = 420 # sieben Minuten
 
     total_req_count = models.Queue.objects.filter(played=False).count()
     if total_req_count < MIN_QUEUE_SONGS_LIMIT and not song.is_locked():
@@ -231,6 +232,12 @@ def queue_song(song, user, event = True, force = False):
         # then the normal rules apply.
         if user_req_and_play_count == total_req_and_play_count:
             force = True
+        # Disallow queuing of multiple long tunes. 
+        if Q.filter(song__song_length__gte = long_tune_length) or (song.song_length >= long_tune_length and get_now_playing_song().requested_by == user and get_now_playing_song().song.song_length >= long_tune_length):   
+            logger.debug("ltlen: %s; Q: %s" % (long_tune_length, Q))
+            models.send_notification("You may only queue one long tune at a time.", user)
+            result = False
+
 
     time_full, time_left, time_next = find_queue_time_limit(user, song)
     time_left_delta = models.TimeDelta(seconds=time_left)
