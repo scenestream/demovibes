@@ -233,7 +233,7 @@ def queue_song(song, user, event = True, force = False):
         if user_req_and_play_count == total_req_and_play_count:
             force = True
         # Disallow queuing of multiple long tunes. 
-        if Q.filter(song__song_length__gte = long_tune_length) or (song.song_length >= long_tune_length and get_now_playing_song().requested_by == user and get_now_playing_song().song.song_length >= long_tune_length):   
+        if (song.song_length >= long_tune_length and Q.filter(song__song_length__gte = long_tune_length).filter(requested_by = user)) or (song.song_length >= long_tune_length and get_now_playing_song().requested_by == user and get_now_playing_song().song.song_length >= long_tune_length):   
             logger.debug("ltlen: %s; Q: %s" % (long_tune_length, Q))
             models.send_notification("You may only queue one long tune at a time.", user)
             result = False
