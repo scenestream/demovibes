@@ -42,7 +42,7 @@ SMILEYS = (
         (':clap:', 'emoticons/clap.gif'),
         (':up:', 'emoticons/anim/ay.gif'),
         (':dangerftw:', 'emoticons/secret/1ow0fl.png'),
-('coffee', 'emoticons/tango/coffee.png'),
+        (':coffee:', 'emoticons/tango/coffee.png'),
 (':cake:', 'emoticons/tango/cake.png'),
 (':silly:', 'emoticons/tango/silly.png'),
 (':victory:', 'emoticons/tango/victory.png'),
