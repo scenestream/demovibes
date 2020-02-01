@@ -377,6 +377,11 @@ padding: 2px;
 clear: both;
 }
 
+.songcomments img {
+	max-width: 150px;
+	max-height: 150px;
+}
+
 #makeitso {
     background-repeat: no-repeat;
 }
