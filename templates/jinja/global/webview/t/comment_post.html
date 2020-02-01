@@ -4,7 +4,7 @@
 	 {{ display.song(post.song) }}
  </td>
  <td>
-	 {{ post.comment|mksafe|bbcode }}
+	 {{ post.comment|mksafe|linebreaks|bbcode|smileys }}
  </td>
  <td>
 	 {{ display.user(post.user) }}
